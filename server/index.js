@@ -46,6 +46,7 @@ const REF_SIGNUP_BONUS = 500;          // +500 per friend signup
 const REF_PRO_BONUS = 1000;            // +1,000 if friend goes Pro
 const REF_MONTHLY_CAP = 10000;         // max referral credits per month
 const MAX_WORDS_FREE = 5000;           // per request cap
+const GUEST_CREDITS = 500;              // one-time guest quota (per browser)
 
 // ---------- DB (JSON store) ----------
 const DB_FILE = path.join(__dirname, '..', 'data', 'db.json');
@@ -60,6 +61,7 @@ function loadDb() {
   if (typeof db !== 'object' || db === null) db = {};
   db.users = db.users || {};
   db.tokens = db.tokens || {};
+  db.guests = db.guests || {};
   db.conversions = db.conversions || [];
   db.shares = db.shares || {};
   db.pending = db.pending || {};
@@ -234,6 +236,18 @@ function publicUser(u) {
 // ---------- API: ME ----------
 app.get('/api/me', (req, res) => {
   const db = loadDb();
+  if (!hasValidToken(db, req)) {
+    const { guestId, rec } = guestInfo(db, req);
+    const used = rec.wordsUsed || 0;
+    return res.json({
+      id: 'guest', isGuest: true, isDemo: true, plan: 'free',
+      name: 'Guest', email: null,
+      credits: Math.max(0, GUEST_CREDITS - used), creditsUsed: used,
+      freeLimit: GUEST_CREDITS, guestLimit: GUEST_CREDITS, guestUsed: used,
+      referralCode: null, referrals: 0, referralCredits: 0,
+      dob: null, country: null, phone: null,
+    });
+  }
   const user = currentUser(db, req);
   res.json(publicUser(user));
 });
@@ -259,18 +273,67 @@ app.put('/api/profile', (req, res) => {
   res.json({ ok: true, user: publicUser(user) });
 });
 
+// ---------- GUESTS (500 free words, per browser) ----------
+function guestInfo(db, req) {
+  const guestId = String(req.headers['x-guest-id'] || req.query.guest || '').slice(0, 64);
+  if (!db.guests[guestId]) db.guests[guestId] = { wordsUsed: 0, createdAt: new Date().toISOString() };
+  return { guestId, rec: db.guests[guestId] };
+}
+function hasValidToken(db, req) {
+  const h = req.headers.authorization || '';
+  const token = h.startsWith('Bearer ') ? h.slice(7) : (req.headers['x-token'] || '');
+  return !!(token && db.tokens[token]);
+}
+
 // ---------- API: TTS ----------
 app.post('/api/tts', async (req, res) => {
   const { text, voice = 'ryan' } = req.body || {};
   if (!text || !text.trim()) return res.status(400).json({ error: 'Text is required' });
   const words = text.trim().split(/\s+/).length;
-  const maxWords = (currentUser(loadDb(), req).plan === 'pro') ? 100000 : MAX_WORDS_FREE;
-  if (words > maxWords) return res.status(400).json({ error: `Too long. Max ${maxWords.toLocaleString()} words per request.` });
+  const db = loadDb();
+  const isGuest = !hasValidToken(db, req);
 
   const v = VOICES[voice];
   if (!v) return res.status(400).json({ error: 'Unknown voice' });
 
-  const db = loadDb();
+  // GUEST PATH: 500 free words per browser, then login popup
+  if (isGuest) {
+    const { guestId, rec } = guestInfo(db, req);
+    const remaining = Math.max(0, GUEST_CREDITS - (rec.wordsUsed || 0));
+    if (words > remaining) {
+      return res.status(402).json({
+        error: 'You have used your 500 free guest words. Log in or create an account to continue.',
+        guestLimit: true, needed: words, have: remaining,
+      });
+    }
+    const id = crypto.randomBytes(8).toString('hex');
+    const outFile = path.join(AUDIO_DIR, `${id}.mp3`);
+    try {
+      await runTts(text, v.edge, outFile);
+      rec.wordsUsed += words;
+      const conv = {
+        id, userId: 'guest', guestId, voice: v.name, voiceId: voice,
+        words, credits: words, textPreview: text.trim().slice(0, 120),
+        audioUrl: `/audio/${id}.mp3`, createdAt: new Date().toISOString(),
+      };
+      db.conversions.push(conv);
+      saveDb(db);
+      res.json({
+        audioUrl: `/audio/${id}.mp3`, id,
+        words, creditsLeft: Math.max(0, GUEST_CREDITS - rec.wordsUsed), creditsUsed: rec.wordsUsed,
+        voice: v.name, guest: true,
+      });
+    } catch (e) {
+      console.error('TTS error:', e.message);
+      res.status(500).json({ error: 'Generation failed. Please try again.' });
+    }
+    return;
+  }
+
+  // LOGGED-IN PATH
+  const maxWords = (currentUser(db, req).plan === 'pro') ? 100000 : MAX_WORDS_FREE;
+  if (words > maxWords) return res.status(400).json({ error: `Too long. Max ${maxWords.toLocaleString()} words per request.` });
+
   const user = currentUser(db, req);
   if (user.credits < words) {
     return res.status(402).json({
@@ -377,6 +440,11 @@ app.get('/api/download/:file', (req, res) => {
 // ---------- API: HISTORY ----------
 app.get('/api/history', (req, res) => {
   const db = loadDb();
+  if (!hasValidToken(db, req)) {
+    const { guestId } = guestInfo(db, req);
+    const items = db.conversions.filter(c => c.guestId === guestId).slice(-50).reverse();
+    return res.json({ items });
+  }
   const user = currentUser(db, req);
   const items = db.conversions.filter(c => c.userId === user.id).slice(-50).reverse();
   res.json({ items });
