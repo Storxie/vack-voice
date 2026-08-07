@@ -295,8 +295,8 @@
   <div class="modal" style="max-width:400px;text-align:center">
     <button class="modal-close" onclick="closeModal('guestLimitModal')">✕ Close</button>
     <div style="font-size:42px;margin-bottom:8px">🔒</div>
-    <h2>Free guest words used!</h2>
-    <p style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5">
+    <h2 id="guestLimitTitle">Free guest words used!</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5" id="guestLimitText">
       You've used your <b>500 free guest words</b>.<br>
       Create a <b>free account</b> to get <b>3,000 credits every month</b>,<br>
       unlimited uploads &amp; downloads, and your own referral link.
@@ -742,7 +742,16 @@ async function generate() {
 
 function downloadAudio() {
   if (!lastAudio) return;
+  if (!user || user.isGuest || user.isDemo) { showDownloadLock(); return; }
   window.location.href = '/api/download/' + lastAudio.file;
+}
+
+function showDownloadLock() {
+  showError('Create a free account to download your audio.');
+  openModal('guestLimitModal');
+  document.getElementById('guestLimitTitle').textContent = '🔒 Sign in to download';
+  document.getElementById('guestLimitText').innerHTML =
+    'You can <b>play</b> your audio as a guest, but to <b>download</b> it, create a <b>free account</b> — you get <b>3,000 credits every month</b>, unlimited uploads &amp; downloads, and your own referral link.';
 }
 
 async function shareAudio() {
@@ -787,7 +796,10 @@ function playHist(id) {
   document.getElementById('resultBox').classList.add('show');
   document.getElementById('player').play();
 }
-function dlHist(id) { window.location.href = '/api/download/' + id + '.mp3'; }
+function dlHist(id) {
+  if (!user || user.isGuest || user.isDemo) { showDownloadLock(); return; }
+  window.location.href = '/api/download/' + id + '.mp3';
+}
 async function shareHist(id) {
   const r = await api('/api/share', { method: 'POST', body: JSON.stringify({ audioId: id }) });
   if (r.status === 200) {
@@ -888,7 +900,12 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 function showPricing(e) { if (e) e.preventDefault(); openModal('pricingModal'); }
 function showSettings(e) { if (e) e.preventDefault(); openModal('settingsModal'); }
 function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.style.display = 'block'; }
-function openGuestLimitModal() { openModal('guestLimitModal'); }
+function openGuestLimitModal() {
+  document.getElementById('guestLimitTitle').textContent = 'Free guest words used!';
+  document.getElementById('guestLimitText').innerHTML =
+    "You've used your <b>500 free guest words</b>.<br>Create a <b>free account</b> to get <b>3,000 credits every month</b>,<br>unlimited uploads &amp; downloads, and your own referral link.";
+  openModal('guestLimitModal');
+}
 function guestLimitSignIn() { closeModal('guestLimitModal'); toggleAuth(); switchAuth('login'); }
 function guestLimitRegister() { closeModal('guestLimitModal'); toggleAuth(); switchAuth('register'); }
 let toastTimer = null;
