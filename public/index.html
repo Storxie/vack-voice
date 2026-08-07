@@ -14,6 +14,23 @@
     --red: #EF4444;
     --text: #f4f4f6;
     --muted: #9ca3af;
+    --inputbg: #101018;
+    --track: #1e1e2a;
+    --hover: #333;
+    --shadow: rgba(0,0,0,0.5);
+    --topbar: rgba(5,5,8,0.9);
+  }
+  body.light {
+    --bg: #f5f7fb;
+    --card: #ffffff;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    --inputbg: #f8fafc;
+    --track: #e2e8f0;
+    --hover: #bcd2ff;
+    --shadow: rgba(15,23,42,0.15);
+    --topbar: rgba(255,255,255,0.92);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -21,39 +38,55 @@
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     min-height: 100vh;
+    transition: background 0.25s, color 0.25s;
   }
   .topbar {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 24px;
+    padding: 14px 24px;
     border-bottom: 1px solid var(--border);
-    background: rgba(5,5,8,0.9);
+    background: var(--topbar);
     position: sticky; top: 0; z-index: 10;
+    backdrop-filter: blur(8px);
   }
-  .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo .mic {
+    width: 34px; height: 34px; background: linear-gradient(135deg,#0066FF,#0044CC);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px;
+  }
   .logo span { color: var(--blue); }
+  .nav { display: flex; gap: 24px; align-items: center; }
+  .nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .nav a:hover { color: var(--text); }
+  .nav a.active { color: var(--blue); }
+  .hamburger { display: none; background: none; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 18px; cursor: pointer; }
+  .mobile-menu {
+    display: none; flex-direction: column; gap: 4px; padding: 12px 24px;
+    background: var(--card); border-bottom: 1px solid var(--border);
+  }
+  .mobile-menu.show { display: flex; }
+  .mobile-menu a { color: var(--muted); text-decoration: none; padding: 10px 0; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .mobile-menu a:last-child { border-bottom: none; }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
+  .hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .hero h1 { font-size: 36px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
+  .hero h1 span { color: var(--blue); }
+  .hero p { color: var(--muted); margin-top: 10px; font-size: 16px; }
+  .freemode { display: flex; flex-direction: column; align-items: center; gap: 10px; }
   .free-badge {
     background: rgba(34,197,94,0.15);
     border: 1px solid rgba(34,197,94,0.4);
     color: var(--green);
-    padding: 4px 12px; border-radius: 999px;
-    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+    padding: 5px 14px; border-radius: 999px;
+    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
   }
-  .nav { display: flex; gap: 20px; align-items: center; }
-  .nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
-  .nav a:hover { color: var(--text); }
-  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
-  .hero { text-align: center; margin-bottom: 32px; }
-  .hero h1 { font-size: 40px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
-  .hero h1 span { color: var(--blue); }
-  .hero p { color: var(--muted); margin-top: 12px; font-size: 17px; }
   .credit-meter {
-    display: flex; align-items: center; gap: 12px;
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
+    border-radius: 12px; padding: 12px 18px; min-width: 230px;
   }
-  .credit-label { font-size: 13px; color: var(--muted); }
-  .credit-num { font-weight: 800; font-size: 15px; }
-  .meter-bar { flex: 1; height: 8px; background: #1e1e2a; border-radius: 99px; overflow: hidden; }
+  .credit-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .credit-num { font-weight: 800; font-size: 19px; color: var(--green); }
+  .credit-num span { color: var(--muted); font-weight: 400; font-size: 13px; }
+  .meter-bar { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-top: 6px; }
   .meter-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s; }
   .card {
     background: var(--card);
@@ -61,9 +94,11 @@
     border-radius: 16px;
     padding: 24px;
   }
+  .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .card h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
   textarea {
     width: 100%; min-height: 180px;
-    background: #101018; color: var(--text);
+    background: var(--inputbg); color: var(--text);
     border: 1px solid var(--border); border-radius: 12px;
     padding: 16px; font-size: 15px; line-height: 1.6;
     resize: vertical; font-family: inherit;
@@ -73,9 +108,9 @@
   .voice-card {
     border: 1px solid var(--border); border-radius: 12px;
     padding: 12px 14px; cursor: pointer; transition: all 0.15s;
-    background: #101018;
+    background: var(--inputbg);
   }
-  .voice-card:hover { border-color: #333; }
+  .voice-card:hover { border-color: var(--hover); }
   .voice-card.active { border-color: var(--blue); background: rgba(0,102,255,0.08); }
   .voice-card .vname { font-weight: 700; font-size: 14px; }
   .voice-card .vdesc { color: var(--muted); font-size: 12px; margin-top: 2px; }
@@ -90,7 +125,7 @@
   .btn-primary:hover { background: #0052cc; }
   .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { color: var(--text); border-color: #333; }
+  .btn-ghost:hover { color: var(--text); border-color: var(--hover); }
   .word-count { margin-left: auto; color: var(--muted); font-size: 13px; }
   .result { margin-top: 20px; display: none; }
   .result.show { display: block; }
@@ -100,7 +135,7 @@
   .loading { display: none; text-align: center; padding: 20px; }
   .loading.show { display: block; }
   .spinner {
-    width: 28px; height: 28px; border: 3px solid #1e1e2a;
+    width: 28px; height: 28px; border: 3px solid var(--track);
     border-top-color: var(--blue); border-radius: 50%;
     animation: spin 0.8s linear infinite; margin: 0 auto 10px;
   }
@@ -109,10 +144,10 @@
     position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
     background: var(--card); border: 1px solid var(--border);
     padding: 12px 20px; border-radius: 10px; font-size: 14px;
-    display: none; z-index: 100; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    display: none; z-index: 100; box-shadow: 0 8px 30px var(--shadow);
   }
   .toast.show { display: block; }
-  /* Pricing modal */
+  /* Modals */
   .modal-overlay {
     display: none; position: fixed; inset: 0; z-index: 200;
     background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px;
@@ -121,12 +156,13 @@
   .modal {
     background: var(--card); border: 1px solid var(--border); border-radius: 16px;
     max-width: 560px; width: 100%; padding: 28px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px var(--shadow);
   }
   .modal h2 { font-size: 24px; margin-bottom: 4px; }
   .modal .msub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
   .plan {
     border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px;
-    background: #101018;
+    background: var(--inputbg);
   }
   .plan.hot { border-color: var(--blue); background: rgba(0,102,255,0.06); }
   .plan .pname { font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; }
@@ -137,45 +173,83 @@
     float: right; background: transparent; border: 1px solid var(--border); color: var(--muted);
     border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
   }
-  .modal-close:hover { color: var(--text); border-color: #333; }
-  footer { text-align: center; color: #444; font-size: 13px; padding: 30px; border-top: 1px solid var(--border); }
-  footer b { color: var(--muted); }
+  .modal-close:hover { color: var(--text); border-color: var(--hover); }
+  /* Settings */
+  .setting-row {
+    display: flex; align-items: center; justify-content: space-between;
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--inputbg);
+  }
+  .setting-row .sname { font-weight: 700; font-size: 15px; }
+  .setting-row .sdesc { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--track); border-radius: 99px; transition: 0.2s;
+  }
+  .slider:before {
+    content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px;
+    background: #fff; border-radius: 50%; transition: 0.2s;
+  }
+  .switch input:checked + .slider { background: var(--blue); }
+  .switch input:checked + .slider:before { transform: translateX(22px); }
+  footer { text-align: center; color: var(--muted); font-size: 14px; padding: 30px; border-top: 1px solid var(--border); }
+  footer b { color: var(--text); }
   @media (max-width: 600px) {
-    .hero h1 { font-size: 30px; }
-    .nav a { display: none; }
-    .container { padding: 24px 16px 60px; }
+    .hero h1 { font-size: 28px; }
+    .nav { display: none; }
+    .hamburger { display: block; }
+    .container { padding: 24px 16px 40px; }
+    .hero { flex-direction: column; align-items: flex-start; }
+    .credit-meter { min-width: 100%; }
   }
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="logo">Vack<span>Voice</span></div>
+  <div class="logo"><div class="mic">🎙️</div> Vack<span>Voice</span></div>
   <div class="nav">
-    <span class="free-badge">FREE MODE</span>
-    <a href="#" onclick="showPricing(event)">Pricing</a>
+    <a onclick="goSection('converter')" class="active">Convert</a>
+    <a onclick="goSection('voices')">Voices</a>
+    <a onclick="showPricing(event)">Pricing</a>
+    <a onclick="showSettings(event)">Settings</a>
   </div>
+  <button class="hamburger" onclick="toggleMenu()">☰</button>
+</div>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="goSection('converter');toggleMenu()">Convert</a>
+  <a onclick="goSection('voices');toggleMenu()">Voices</a>
+  <a onclick="showPricing(event);toggleMenu()">Pricing</a>
+  <a onclick="showSettings(event);toggleMenu()">Settings</a>
 </div>
 
 <div class="container">
   <div class="hero">
-    <h1>Turn text into <span>voice</span> in seconds</h1>
-    <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
-  </div>
-
-  <div class="credit-meter">
     <div>
-      <div class="credit-label">Credits left</div>
-      <div class="credit-num"><span id="creditsNum">--</span> <span style="color:var(--muted);font-weight:400;font-size:13px;">/ 3,000</span></div>
+      <h1>Turn text into <span>voice</span> in seconds</h1>
+      <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
     </div>
-    <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:100%"></div></div>
+    <div class="freemode">
+      <div class="free-badge">🆓 FREE MODE</div>
+      <div class="credit-meter">
+        <div class="credit-label">free credits this month</div>
+        <div class="credit-num"><span id="creditsNum">--</span><span> / 3,000</span></div>
+        <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:100%"></div></div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="converter">
+    <h3><span class="dot"></span> 1. Add your text</h3>
     <textarea id="textInput" placeholder="Type or paste your text here... e.g. Welcome to Vack Voice. Your content just got a voice."></textarea>
-    <div class="voice-grid" id="voiceGrid"></div>
+    <div id="voices">
+      <h3 style="margin-top:20px"><span class="dot"></span> 2. Choose your voice</h3>
+      <div class="voice-grid" id="voiceGrid"></div>
+    </div>
     <div class="controls">
-      <button class="btn btn-primary" id="genBtn" onclick="generate()">Generate Voice 🎙️</button>
+      <button class="btn btn-primary" id="genBtn" onclick="generate()">🎙️ Convert to Audio</button>
       <button class="btn btn-ghost" onclick="clearText()">Clear</button>
       <div class="word-count"><span id="wordCount">0</span> words · 1 credit per word</div>
     </div>
@@ -195,15 +269,15 @@
 </div>
 
 <footer>
-  <b>Vack Voice</b> · by Storxie Nexus · Powered by Microsoft Edge neural voices
+  <b>Vack Voice</b> · by Storxie Nexus
 </footer>
 
 <div class="toast" id="toast"></div>
 
 <!-- Pricing modal: only reachable from the menu -->
-<div class="modal-overlay" id="pricingModal" onclick="if(event.target===this)closePricing()">
+<div class="modal-overlay" id="pricingModal" onclick="if(event.target===this)closeModal('pricingModal')">
   <div class="modal">
-    <button class="modal-close" onclick="closePricing()">✕ Close</button>
+    <button class="modal-close" onclick="closeModal('pricingModal')">✕ Close</button>
     <h2>Pricing</h2>
     <div class="msub">Simple plans. No hidden fees. Upgrade anytime.</div>
 
@@ -233,11 +307,37 @@
   </div>
 </div>
 
+<!-- Settings modal -->
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('settingsModal')">✕ Close</button>
+    <h2>Settings</h2>
+    <div class="msub">Personalize your experience.</div>
+
+    <div class="setting-row">
+      <div>
+        <div class="sname">🌙 Dark mode</div>
+        <div class="sdesc">Switch between dark and light appearance</div>
+      </div>
+      <label class="switch">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
+        <span class="slider"></span>
+      </label>
+    </div>
+  </div>
+</div>
+
 <script>
 let selectedVoice = 'ryan';
 let voices = [];
 
 async function init() {
+  // Theme from saved preference (default dark)
+  const saved = localStorage.getItem('vv-theme');
+  const dark = saved === null ? true : saved === 'dark';
+  document.body.classList.toggle('light', !dark);
+  document.getElementById('themeToggle').checked = !dark;
+
   try {
     const res = await fetch('/api/voices');
     const data = await res.json();
@@ -255,6 +355,20 @@ async function init() {
 
   document.getElementById('textInput').addEventListener('input', updateCount);
   updateCount();
+}
+
+function toggleTheme(dark) {
+  document.body.classList.toggle('light', !dark);
+  localStorage.setItem('vv-theme', dark ? 'dark' : 'light');
+}
+
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('show');
+}
+
+function goSection(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderVoices() {
@@ -337,12 +451,17 @@ function showError(msg) {
 }
 
 function showPricing(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   document.getElementById('pricingModal').classList.add('show');
 }
 
-function closePricing() {
-  document.getElementById('pricingModal').classList.remove('show');
+function showSettings(e) {
+  if (e) e.preventDefault();
+  document.getElementById('settingsModal').classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
 }
 
 init();
