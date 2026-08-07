@@ -191,6 +191,7 @@
       </div>
       <div class="freemode">
         <div class="free-badge">🆓 FREE MODE</div>
+        <div class="free-badge" id="guestBadge" style="display:none;background:var(--accent,#0066FF)">👤 GUEST · 500 FREE WORDS</div>
         <div class="credit-meter">
           <div class="credit-label" id="creditLabel">free credits this month</div>
           <div class="credit-num"><span id="creditsNum">--</span><span id="creditsTotal"> / 3,000</span></div>
@@ -286,6 +287,24 @@
       <button class="btn btn-primary" style="width:100%" onclick="doRegister()">Create Free Account</button>
     </div>
     <div class="error" id="authError" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- GUEST LIMIT MODAL (500 free words used) -->
+<div class="modal-overlay" id="guestLimitModal" onclick="if(event.target===this)closeModal('guestLimitModal')">
+  <div class="modal" style="max-width:400px;text-align:center">
+    <button class="modal-close" onclick="closeModal('guestLimitModal')">✕ Close</button>
+    <div style="font-size:42px;margin-bottom:8px">🔒</div>
+    <h2>Free guest words used!</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:10px;line-height:1.5">
+      You've used your <b>500 free guest words</b>.<br>
+      Create a <b>free account</b> to get <b>3,000 credits every month</b>,<br>
+      unlimited uploads &amp; downloads, and your own referral link.
+    </p>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-ghost" style="flex:1" onclick="guestLimitSignIn()">Sign In</button>
+      <button class="btn btn-primary" style="flex:1" onclick="guestLimitRegister()">Create Account</button>
+    </div>
   </div>
 </div>
 
@@ -397,9 +416,12 @@ let voices = [];
 let token = localStorage.getItem('vv-token') || '';
 let user = null;
 let lastAudio = null;
+// Persistent guest ID so the 500 free words survive page reloads
+let guestId = localStorage.getItem('vv-guest');
+if (!guestId) { guestId = 'g' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); localStorage.setItem('vv-guest', guestId); }
 
 async function api(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  const headers = { 'Content-Type': 'application/json', 'x-guest-id': guestId, ...(opts.headers || {}) };
   if (token) headers['Authorization'] = 'Bearer ' + token;
   const res = await fetch(path, { ...opts, headers });
   let data = null;
@@ -435,12 +457,26 @@ async function refreshMe() {
   const r = await api('/api/me');
   if (r.status === 200 && r.data) {
     user = r.data;
-    document.getElementById('creditsNum').textContent = (user.credits || 0).toLocaleString();
-    document.getElementById('creditsTotal').textContent = user.plan === 'pro' ? '' : ' / 3,000';
-    document.getElementById('creditLabel').textContent = user.plan === 'pro' ? 'pro credits (monthly)' : 'free credits this month';
-    const limit = user.plan === 'pro' ? 100000 : 3000;
-    const pct = Math.max(0, Math.min(100, ((user.credits || 0) / limit) * 100));
-    document.getElementById('meterFill').style.width = pct + '%';
+    if (user.isGuest) {
+      // Guest: 500 free words meter
+      const limit = user.guestLimit || 500;
+      const used = user.guestUsed || 0;
+      const left = Math.max(0, limit - used);
+      document.getElementById('creditsNum').textContent = left.toLocaleString();
+      document.getElementById('creditsTotal').textContent = ' / ' + limit.toLocaleString();
+      document.getElementById('creditLabel').textContent = 'free guest words';
+      const pct = Math.max(0, Math.min(100, (used / limit) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
+      document.getElementById('guestBadge').style.display = 'flex';
+    } else {
+      document.getElementById('guestBadge').style.display = 'none';
+      document.getElementById('creditsNum').textContent = (user.credits || 0).toLocaleString();
+      document.getElementById('creditsTotal').textContent = user.plan === 'pro' ? '' : ' / 3,000';
+      document.getElementById('creditLabel').textContent = user.plan === 'pro' ? 'pro credits (monthly)' : 'free credits this month';
+      const limit = user.plan === 'pro' ? 100000 : 3000;
+      const pct = Math.max(0, Math.min(100, ((user.credits || 0) / limit) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
+    }
     renderChip();
     loadRef();
   }
@@ -668,6 +704,12 @@ async function generate() {
   try {
     const r = await api('/api/tts', { method: 'POST', body: JSON.stringify({ text, voice: selectedVoice }) });
     if (r.status !== 200) {
+      if (r.data && r.data.guestLimit) {
+        // Guest ran out of 500 free words -> popup to log in / create account
+        showError('You have used your 500 free words. Create a free account for 3,000 credits every month!');
+        openGuestLimitModal();
+        return;
+      }
       if (r.data && r.data.upgrade) showError(`Not enough credits. You need ${r.data.needed.toLocaleString()} but have ${r.data.have.toLocaleString()}. Upgrade to Pro for 100K credits.`);
       else showError((r.data && r.data.error) || 'Something went wrong.');
       return;
@@ -676,11 +718,22 @@ async function generate() {
     lastAudio = { url: d.audioUrl, id: d.id, file: d.audioUrl.split('/').pop() };
     document.getElementById('player').src = d.audioUrl;
     document.getElementById('resultVoice').textContent = 'Voice: ' + d.voice + ' · ' + d.words.toLocaleString() + ' words';
-    document.getElementById('resultCredits').textContent = d.creditsLeft.toLocaleString() + ' credits left';
+    document.getElementById('resultCredits').textContent = d.creditsLeft.toLocaleString() + (d.guest ? ' guest words left' : ' credits left');
     document.getElementById('creditsNum').textContent = d.creditsLeft.toLocaleString();
-    const limit = (user && user.plan === 'pro') ? 100000 : 3000;
-    const pct = Math.max(0, Math.min(100, (d.creditsLeft / limit) * 100));
-    document.getElementById('meterFill').style.width = pct + '%';
+    if (d.guest) {
+      const limit = (user && user.guestLimit) || 500;
+      const used = limit - d.creditsLeft;
+      const pct = Math.max(0, Math.min(100, (used / limit) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
+      document.getElementById('creditsTotal').textContent = ' / ' + limit.toLocaleString();
+      document.getElementById('creditLabel').textContent = 'free guest words';
+    } else {
+      const limit = (user && user.plan === 'pro') ? 100000 : 3000;
+      const pct = Math.max(0, Math.min(100, (d.creditsLeft / limit) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
+      document.getElementById('creditsTotal').textContent = (user && user.plan === 'pro') ? '' : ' / 3,000';
+      document.getElementById('creditLabel').textContent = (user && user.plan === 'pro') ? 'pro credits (monthly)' : 'free credits this month';
+    }
     document.getElementById('shareLinkBox').style.display = 'none';
     resultBox.classList.add('show');
   } catch (e) { showError('Network error. Please try again.'); }
@@ -835,6 +888,9 @@ function closeModal(id) { document.getElementById(id).classList.remove('show'); 
 function showPricing(e) { if (e) e.preventDefault(); openModal('pricingModal'); }
 function showSettings(e) { if (e) e.preventDefault(); openModal('settingsModal'); }
 function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.style.display = 'block'; }
+function openGuestLimitModal() { openModal('guestLimitModal'); }
+function guestLimitSignIn() { closeModal('guestLimitModal'); toggleAuth(); switchAuth('login'); }
+function guestLimitRegister() { closeModal('guestLimitModal'); toggleAuth(); switchAuth('register'); }
 let toastTimer = null;
 function toast(msg) {
   const t = document.getElementById('toast');
