@@ -207,7 +207,6 @@
   <a onclick="goView('history');toggleMenu()">History</a>
   <a onclick="showPricing(event);toggleMenu()">Pricing</a>
   <a onclick="showSettings(event);toggleMenu()">Settings</a>
-  <a id="mobileAuth" onclick="toggleAuth();toggleMenu()">Sign In</a>
 </div>
 
 <div class="container">
@@ -529,16 +528,13 @@ async function refreshMe() {
 
 function renderChip() {
   const chip = document.getElementById('userChip');
-  const mobile = document.getElementById('mobileAuth');
   if (user && !user.isDemo) {
     const initial = (user.name || 'U').charAt(0).toUpperCase();
     chip.innerHTML = `<div class="avatar">${initial}</div> ${user.name.split(' ')[0]} <span style="color:var(--green)">●</span>`;
-    mobile.textContent = user.name.split(' ')[0] + ' (Log Out)';
     document.getElementById('udName').textContent = user.name;
     document.getElementById('udMail').textContent = user.email || '';
   } else {
     chip.innerHTML = `<div class="avatar">👤</div> Sign In`;
-    mobile.textContent = 'Sign In';
     document.getElementById('udName').textContent = 'Guest';
     document.getElementById('udMail').textContent = 'Sign in to save your work';
   }
