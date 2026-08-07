@@ -220,7 +220,8 @@
         <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
       </div>
       <div class="freemode">
-        <div class="free-badge">🆓 FREE MODE</div>
+        <div class="free-badge" id="freeBadge">🆓 FREE MODE</div>
+        <div class="free-badge" id="proBadge" style="display:none;background:linear-gradient(135deg,#FFD700,#FFA500);color:#1a1a1a;border-color:rgba(255,215,0,0.6)">⭐ PRO</div>
         <div class="free-badge" id="guestBadge" style="display:none;background:var(--accent,#0066FF)">👤 GUEST · 500 FREE WORDS</div>
         <div class="credit-meter">
           <div class="credit-label" id="creditLabel">free credits this month</div>
@@ -498,12 +499,26 @@ async function refreshMe() {
       const pct = Math.max(0, Math.min(100, (used / limit) * 100));
       document.getElementById('meterFill').style.width = pct + '%';
       document.getElementById('guestBadge').style.display = 'flex';
+      document.getElementById('freeBadge').style.display = 'none';
+      document.getElementById('proBadge').style.display = 'none';
+    } else if (user.plan === 'pro') {
+      // Pro: hide FREE MODE, show PRO badge
+      document.getElementById('freeBadge').style.display = 'none';
+      document.getElementById('guestBadge').style.display = 'none';
+      document.getElementById('proBadge').style.display = 'inline-block';
+      document.getElementById('creditsNum').textContent = (user.credits || 0).toLocaleString();
+      document.getElementById('creditsTotal').textContent = '';
+      document.getElementById('creditLabel').textContent = 'pro credits (monthly)';
+      const pct = Math.max(0, Math.min(100, ((user.credits || 0) / 100000) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
     } else {
       document.getElementById('guestBadge').style.display = 'none';
+      document.getElementById('proBadge').style.display = 'none';
+      document.getElementById('freeBadge').style.display = 'inline-block';
       document.getElementById('creditsNum').textContent = (user.credits || 0).toLocaleString();
-      document.getElementById('creditsTotal').textContent = user.plan === 'pro' ? '' : ' / 3,000';
-      document.getElementById('creditLabel').textContent = user.plan === 'pro' ? 'pro credits (monthly)' : 'free credits this month';
-      const limit = user.plan === 'pro' ? 100000 : 3000;
+      document.getElementById('creditsTotal').textContent = ' / 3,000';
+      document.getElementById('creditLabel').textContent = 'free credits this month';
+      const limit = 3000;
       const pct = Math.max(0, Math.min(100, ((user.credits || 0) / limit) * 100));
       document.getElementById('meterFill').style.width = pct + '%';
     }
@@ -757,12 +772,22 @@ async function generate() {
       document.getElementById('meterFill').style.width = pct + '%';
       document.getElementById('creditsTotal').textContent = ' / ' + limit.toLocaleString();
       document.getElementById('creditLabel').textContent = 'free guest words';
+    } else if (user && user.plan === 'pro') {
+      const pct = Math.max(0, Math.min(100, (d.creditsLeft / 100000) * 100));
+      document.getElementById('meterFill').style.width = pct + '%';
+      document.getElementById('creditsTotal').textContent = '';
+      document.getElementById('creditLabel').textContent = 'pro credits (monthly)';
+      document.getElementById('freeBadge').style.display = 'none';
+      document.getElementById('proBadge').style.display = 'inline-block';
+      document.getElementById('guestBadge').style.display = 'none';
     } else {
-      const limit = (user && user.plan === 'pro') ? 100000 : 3000;
+      const limit = 3000;
       const pct = Math.max(0, Math.min(100, (d.creditsLeft / limit) * 100));
       document.getElementById('meterFill').style.width = pct + '%';
-      document.getElementById('creditsTotal').textContent = (user && user.plan === 'pro') ? '' : ' / 3,000';
-      document.getElementById('creditLabel').textContent = (user && user.plan === 'pro') ? 'pro credits (monthly)' : 'free credits this month';
+      document.getElementById('creditsTotal').textContent = ' / 3,000';
+      document.getElementById('creditLabel').textContent = 'free credits this month';
+      document.getElementById('freeBadge').style.display = 'inline-block';
+      document.getElementById('proBadge').style.display = 'none';
     }
     document.getElementById('shareLinkBox').style.display = 'none';
     resultBox.classList.add('show');
