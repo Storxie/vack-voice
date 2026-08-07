@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vack Voice - Turn text into speech in seconds</title>
+<style>
+  :root {
+    --bg: #050508;
+    --card: #0C0C12;
+    --border: #1e1e2a;
+    --blue: #0066FF;
+    --green: #22C55E;
+    --red: #EF4444;
+    --text: #f4f4f6;
+    --muted: #9ca3af;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+  }
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,5,8,0.9);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--blue); }
+  .free-badge {
+    background: rgba(34,197,94,0.15);
+    border: 1px solid rgba(34,197,94,0.4);
+    color: var(--green);
+    padding: 4px 12px; border-radius: 999px;
+    font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .nav { display: flex; gap: 20px; align-items: center; }
+  .nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+  .nav a:hover { color: var(--text); }
+  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  .hero { text-align: center; margin-bottom: 32px; }
+  .hero h1 { font-size: 40px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
+  .hero h1 span { color: var(--blue); }
+  .hero p { color: var(--muted); margin-top: 12px; font-size: 17px; }
+  .credit-meter {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
+  }
+  .credit-label { font-size: 13px; color: var(--muted); }
+  .credit-num { font-weight: 800; font-size: 15px; }
+  .meter-bar { flex: 1; height: 8px; background: #1e1e2a; border-radius: 99px; overflow: hidden; }
+  .meter-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  textarea {
+    width: 100%; min-height: 180px;
+    background: #101018; color: var(--text);
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px; font-size: 15px; line-height: 1.6;
+    resize: vertical; font-family: inherit;
+  }
+  textarea:focus { outline: 2px solid var(--blue); border-color: transparent; }
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
+  .voice-card {
+    border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 14px; cursor: pointer; transition: all 0.15s;
+    background: #101018;
+  }
+  .voice-card:hover { border-color: #333; }
+  .voice-card.active { border-color: var(--blue); background: rgba(0,102,255,0.08); }
+  .voice-card .vname { font-weight: 700; font-size: 14px; }
+  .voice-card .vdesc { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .voice-card .vflag { font-size: 18px; }
+  .controls { display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
+  .btn {
+    padding: 12px 24px; border: none; border-radius: 10px;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: #0052cc; }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { color: var(--text); border-color: #333; }
+  .word-count { margin-left: auto; color: var(--muted); font-size: 13px; }
+  .result { margin-top: 20px; display: none; }
+  .result.show { display: block; }
+  .result audio { width: 100%; margin-top: 10px; }
+  .result-info { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .error { color: var(--red); font-size: 14px; margin-top: 12px; display: none; }
+  .loading { display: none; text-align: center; padding: 20px; }
+  .loading.show { display: block; }
+  .spinner {
+    width: 28px; height: 28px; border: 3px solid #1e1e2a;
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 10px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--card); border: 1px solid var(--border);
+    padding: 12px 20px; border-radius: 10px; font-size: 14px;
+    display: none; z-index: 100; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  }
+  .toast.show { display: block; }
+  footer { text-align: center; color: #444; font-size: 13px; padding: 30px; border-top: 1px solid var(--border); }
+  footer b { color: var(--muted); }
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 30px; }
+    .nav a { display: none; }
+    .container { padding: 24px 16px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">Vack<span>Voice</span></div>
+  <div class="nav">
+    <span class="free-badge">FREE MODE</span>
+    <a href="#" onclick="showPricing(event)">Pricing</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="hero">
+    <h1>Turn text into <span>voice</span> in seconds</h1>
+    <p>5 natural voices including African accents. Free forever plan. No watermark.</p>
+  </div>
+
+  <div class="credit-meter">
+    <div>
+      <div class="credit-label">Credits left</div>
+      <div class="credit-num"><span id="creditsNum">--</span> <span style="color:var(--muted);font-weight:400;font-size:13px;">/ 3,000</span></div>
+    </div>
+    <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:100%"></div></div>
+  </div>
+
+  <div class="card">
+    <textarea id="textInput" placeholder="Type or paste your text here... e.g. Welcome to Vack Voice. Your content just got a voice."></textarea>
+    <div class="voice-grid" id="voiceGrid"></div>
+    <div class="controls">
+      <button class="btn btn-primary" id="genBtn" onclick="generate()">Generate Voice 🎙️</button>
+      <button class="btn btn-ghost" onclick="clearText()">Clear</button>
+      <div class="word-count"><span id="wordCount">0</span> words · 1 credit per word</div>
+    </div>
+    <div class="error" id="errorBox"></div>
+    <div class="loading" id="loadingBox">
+      <div class="spinner"></div>
+      <div>Generating your audio...</div>
+    </div>
+    <div class="result" id="resultBox">
+      <audio id="player" controls></audio>
+      <div class="result-info">
+        <span id="resultVoice"></span>
+        <span id="resultCredits"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <b>Vack Voice</b> · by Storxie Nexus · Powered by Microsoft Edge neural voices
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+let selectedVoice = 'ryan';
+let voices = [];
+
+async function init() {
+  try {
+    const res = await fetch('/api/voices');
+    const data = await res.json();
+    voices = data.voices;
+    renderVoices();
+  } catch (e) { console.error(e); }
+
+  try {
+    const res = await fetch('/api/me');
+    const me = await res.json();
+    document.getElementById('creditsNum').textContent = me.credits.toLocaleString();
+    const pct = Math.max(0, Math.min(100, (me.credits / me.freeLimit) * 100));
+    document.getElementById('meterFill').style.width = pct + '%';
+  } catch (e) { console.error(e); }
+
+  document.getElementById('textInput').addEventListener('input', updateCount);
+  updateCount();
+}
+
+function renderVoices() {
+  const grid = document.getElementById('voiceGrid');
+  grid.innerHTML = '';
+  voices.forEach(v => {
+    const card = document.createElement('div');
+    card.className = 'voice-card' + (v.id === selectedVoice ? ' active' : '');
+    card.innerHTML = `<div class="vflag">${v.flag}</div><div class="vname">${v.name}</div><div class="vdesc">${v.desc}</div>`;
+    card.onclick = () => {
+      selectedVoice = v.id;
+      document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('active'));
+      card.classList.add('active');
+    };
+    grid.appendChild(card);
+  });
+}
+
+function updateCount() {
+  const text = document.getElementById('textInput').value.trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = words.toLocaleString();
+}
+
+function clearText() {
+  document.getElementById('textInput').value = '';
+  updateCount();
+}
+
+async function generate() {
+  const text = document.getElementById('textInput').value.trim();
+  const errorBox = document.getElementById('errorBox');
+  const loadingBox = document.getElementById('loadingBox');
+  const resultBox = document.getElementById('resultBox');
+  const genBtn = document.getElementById('genBtn');
+
+  errorBox.style.display = 'none';
+  resultBox.classList.remove('show');
+  if (!text) { showError('Please type some text first.'); return; }
+
+  genBtn.disabled = true;
+  loadingBox.classList.add('show');
+
+  try {
+    const res = await fetch('/api/tts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice: selectedVoice })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      if (data.upgrade) {
+        showError(`Not enough credits. You need ${data.needed.toLocaleString()} but have ${data.have.toLocaleString()}. Upgrade to Pro for 100K credits.`);
+      } else {
+        showError(data.error || 'Something went wrong.');
+      }
+      return;
+    }
+
+    document.getElementById('player').src = data.audioUrl;
+    document.getElementById('resultVoice').textContent = 'Voice: ' + data.voice + ' · ' + data.words.toLocaleString() + ' words';
+    document.getElementById('resultCredits').textContent = data.creditsLeft.toLocaleString() + ' credits left';
+    document.getElementById('creditsNum').textContent = data.creditsLeft.toLocaleString();
+    const pct = Math.max(0, Math.min(100, (data.creditsLeft / 3000) * 100));
+    document.getElementById('meterFill').style.width = pct + '%';
+    resultBox.classList.add('show');
+  } catch (e) {
+    showError('Network error. Please try again.');
+  } finally {
+    genBtn.disabled = false;
+    loadingBox.classList.remove('show');
+  }
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.style.display = 'block';
+}
+
+function showPricing(e) {
+  e.preventDefault();
+  const toast = document.getElementById('toast');
+  toast.innerHTML = '💰 <b>Pricing</b><br>Free: 3,000 credits/mo<br>Pro: ₦5,000/mo = 100,000 credits + unlimited uploads<br>Extra credits: ₦500 = 5,000 (never expire)';
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 6000);
+}
+
+init();
+</script>
+</body>
+</html>
