@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vack Voice - Turn text into speech in seconds</title>
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <style>
   :root {
     --bg: #050508; --card: #0C0C12; --border: #1e1e2a; --blue: #0066FF;
@@ -60,6 +61,20 @@
   .voice-card .vname { font-weight: 700; font-size: 14px; }
   .voice-card .vdesc { color: var(--muted); font-size: 12px; margin-top: 2px; }
   .voice-card .vflag { font-size: 18px; }
+  .voice-card .vtop { display: flex; align-items: center; justify-content: space-between; }
+  .vplay { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border); background: var(--card); color: var(--blue); font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all .15s; flex-shrink: 0; }
+  .vplay:hover { border-color: var(--blue); background: rgba(0,102,255,0.12); }
+  .vplay.playing { background: var(--blue); color: #fff; }
+  .userwrap { position: relative; display: inline-block; }
+  .udrop { position: absolute; right: 0; top: calc(100% + 8px); background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 200px; box-shadow: 0 12px 30px var(--shadow); z-index: 50; overflow: hidden; display: none; }
+  .udrop.show { display: block; }
+  .udrop .uitem { display: flex; align-items: center; gap: 10px; padding: 12px 16px; font-size: 14px; font-weight: 600; color: var(--text); cursor: pointer; border-bottom: 1px solid var(--border); }
+  .udrop .uitem:last-child { border-bottom: none; }
+  .udrop .uitem:hover { background: var(--inputbg); }
+  .udrop .uitem.logout { color: var(--red); }
+  .udrop .uhead { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .udrop .uhead .uname { font-weight: 800; font-size: 14px; }
+  .udrop .uhead .umail { color: var(--muted); font-size: 12px; margin-top: 2px; word-break: break-all; }
   .controls { display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
   .btn { padding: 11px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; }
   .btn-primary { background: var(--blue); color: #fff; }
@@ -142,7 +157,17 @@
     <a id="navHistory" onclick="goView('history')">History</a>
     <a onclick="showPricing(event)">Pricing</a>
     <a onclick="showSettings(event)">Settings</a>
-    <span class="userchip" id="userChip" onclick="toggleAuth()"></span>
+    <div class="userwrap">
+      <span class="userchip" id="userChip" onclick="toggleUserMenu(event)"></span>
+      <div class="udrop" id="userDrop">
+        <div class="uhead">
+          <div class="uname" id="udName">—</div>
+          <div class="umail" id="udMail">—</div>
+        </div>
+        <div class="uitem" onclick="openProfile()">👤 Profile</div>
+        <div class="uitem logout" onclick="confirmLogout()">🚪 Log Out</div>
+      </div>
+    </div>
   </div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
@@ -313,7 +338,55 @@
       <label class="switch"><input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)"><span class="slider"></span></label>
     </div>
     <div style="margin-top:14px">
-      <button class="btn btn-ghost" style="width:100%" id="logoutBtn" onclick="doLogout()">Sign Out</button>
+      <button class="btn btn-ghost" style="width:100%" id="logoutBtn" onclick="confirmLogout()">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal" onclick="if(event.target===this)closeModal('profileModal')">
+  <div class="modal" style="max-width:440px">
+    <button class="modal-close" onclick="closeModal('profileModal')">✕ Close</button>
+    <h2>Your Profile 👤</h2>
+    <div class="msub">Keep your details up to date.</div>
+    <div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+      <div>
+        <label style="font-size:12px;color:var(--muted);font-weight:700">FULL NAME</label>
+        <input type="text" id="profName" placeholder="Your name">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);font-weight:700">EMAIL</label>
+        <input type="email" id="profEmail" placeholder="Email address" disabled style="opacity:.6">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);font-weight:700">DATE OF BIRTH</label>
+        <input type="date" id="profDob" style="color-scheme:dark">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);font-weight:700">COUNTRY</label>
+        <input type="text" id="profCountry" placeholder="e.g. Nigeria">
+      </div>
+      <div>
+        <label style="font-size:12px;color:var(--muted);font-weight:700">PHONE / WHATSAPP</label>
+        <input type="tel" id="profPhone" placeholder="e.g. +234 800 000 0000">
+      </div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-top:18px" onclick="saveProfile()">Save Changes</button>
+    <div class="error" id="profError" style="margin-top:10px"></div>
+    <div class="ok" id="profOk" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- LOGOUT CONFIRM MODAL -->
+<div class="modal-overlay" id="logoutModal" onclick="if(event.target===this)closeModal('logoutModal')">
+  <div class="modal" style="max-width:360px;text-align:center">
+    <button class="modal-close" onclick="closeModal('logoutModal')">✕ Close</button>
+    <div style="font-size:38px;margin-bottom:8px">🚪</div>
+    <h2>Log out?</h2>
+    <p style="color:var(--muted);font-size:14px;margin-top:8px">You'll need to sign in again to access your credits and history.</p>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeModal('logoutModal')">Cancel</button>
+      <button class="btn btn-primary" style="flex:1;background:var(--red)" onclick="doLogout()">Yes, Log Out</button>
     </div>
   </div>
 </div>
@@ -379,21 +452,73 @@ function renderChip() {
   if (user && !user.isDemo) {
     const initial = (user.name || 'U').charAt(0).toUpperCase();
     chip.innerHTML = `<div class="avatar">${initial}</div> ${user.name.split(' ')[0]} <span style="color:var(--green)">●</span>`;
-    mobile.textContent = user.name.split(' ')[0] + ' (Sign Out)';
+    mobile.textContent = user.name.split(' ')[0] + ' (Log Out)';
+    document.getElementById('udName').textContent = user.name;
+    document.getElementById('udMail').textContent = user.email || '';
   } else {
     chip.innerHTML = `<div class="avatar">👤</div> Sign In`;
     mobile.textContent = 'Sign In';
+    document.getElementById('udName').textContent = 'Guest';
+    document.getElementById('udMail').textContent = 'Sign in to save your work';
   }
 }
 
+function toggleUserMenu(e) {
+  if (e) e.stopPropagation();
+  if (!user || user.isDemo) { toggleAuth(); return; }
+  document.getElementById('userDrop').classList.toggle('show');
+}
+
 function toggleAuth() {
-  if (user && !user.isDemo) { doLogout(); return; }
+  if (user && !user.isDemo) { toggleUserMenu(); return; }
   const ref = localStorage.getItem('vv-ref');
   if (ref) {
     document.getElementById('refHint').textContent = '🎁 You were invited! You both get +500 credits.';
   }
   switchAuth('login');
   openModal('authModal');
+}
+document.addEventListener('click', () => {
+  document.getElementById('userDrop').classList.remove('show');
+});
+
+function openProfile() {
+  document.getElementById('userDrop').classList.remove('show');
+  document.getElementById('profName').value = user.name || '';
+  document.getElementById('profEmail').value = user.email || '';
+  document.getElementById('profDob').value = user.dob || '';
+  document.getElementById('profCountry').value = user.country || '';
+  document.getElementById('profPhone').value = user.phone || '';
+  document.getElementById('profError').style.display = 'none';
+  document.getElementById('profOk').style.display = 'none';
+  openModal('profileModal');
+}
+
+async function saveProfile() {
+  const body = {
+    name: document.getElementById('profName').value.trim(),
+    dob: document.getElementById('profDob').value,
+    country: document.getElementById('profCountry').value.trim(),
+    phone: document.getElementById('profPhone').value.trim(),
+  };
+  if (!body.name) { showProfErr('Please enter your name'); return; }
+  const r = await api('/api/profile', { method: 'PUT', body: JSON.stringify(body) });
+  if (r.status !== 200) { showProfErr((r.data && r.data.error) || 'Could not save'); return; }
+  user = r.data.user || user;
+  const ok = document.getElementById('profOk');
+  ok.textContent = '✅ Saved!'; ok.style.display = 'block';
+  renderChip();
+  setTimeout(() => closeModal('profileModal'), 1200);
+}
+function showProfErr(msg) {
+  const el = document.getElementById('profError');
+  el.textContent = msg; el.style.display = 'block';
+}
+
+function confirmLogout() {
+  document.getElementById('userDrop').classList.remove('show');
+  closeModal('settingsModal');
+  openModal('logoutModal');
 }
 
 function switchAuth(mode) {
@@ -435,6 +560,8 @@ async function doLogout() {
   await api('/api/logout', { method: 'POST' });
   token = ''; localStorage.removeItem('vv-token');
   user = null; renderChip(); await refreshMe(); toast('Signed out.');
+  closeModal('settingsModal');
+  closeModal('logoutModal');
 }
 
 function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('show'); }
@@ -453,16 +580,37 @@ function toggleTheme(dark) {
   localStorage.setItem('vv-theme', dark ? 'dark' : 'light');
 }
 
+let demoAudio = null;
 function renderVoices() {
   const grid = document.getElementById('voiceGrid');
   grid.innerHTML = '';
   voices.forEach(v => {
     const card = document.createElement('div');
     card.className = 'voice-card' + (v.id === selectedVoice ? ' active' : '');
-    card.innerHTML = `<div class="vflag">${v.flag}</div><div class="vname">${v.name}</div><div class="vdesc">${v.desc}</div>`;
+    card.innerHTML = `<div class="vtop"><div class="vflag">${v.flag}</div><button class="vplay" id="play_${v.id}" title="Hear this voice" onclick="playDemo('${v.id}', event)">▶</button></div><div class="vname">${v.name}</div><div class="vdesc">${v.desc}</div>`;
     card.onclick = () => { selectedVoice = v.id; document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('active')); card.classList.add('active'); };
     grid.appendChild(card);
   });
+}
+
+function playDemo(voiceId, e) {
+  if (e) e.stopPropagation();
+  const v = voices.find(x => x.id === voiceId);
+  if (!v) return;
+  const btn = document.getElementById('play_' + voiceId);
+  if (demoAudio && !demoAudio.paused && demoAudio.dataset.voice === voiceId) {
+    demoAudio.pause(); btn.textContent = '▶'; btn.classList.remove('playing');
+    return;
+  }
+  document.querySelectorAll('.vplay').forEach(b => { b.textContent = '▶'; b.classList.remove('playing'); });
+  if (!demoAudio) {
+    demoAudio = new Audio();
+    demoAudio.onended = () => { document.querySelectorAll('.vplay').forEach(b => { b.textContent = '▶'; b.classList.remove('playing'); }); };
+  }
+  demoAudio.dataset.voice = voiceId;
+  demoAudio.src = v.demo;
+  demoAudio.play();
+  btn.textContent = '⏸'; btn.classList.add('playing');
 }
 
 function updateCount() {
@@ -614,6 +762,21 @@ async function copyRef() {
 }
 
 // ---------- PAYSTACK ----------
+let payCfg = null;
+async function loadPayConfig() {
+  if (payCfg) return payCfg;
+  try {
+    const r = await api('/api/pay/config');
+    if (r.status === 200 && r.data) payCfg = r.data;
+  } catch (e) {}
+  return payCfg;
+}
+
+function genRef(plan) {
+  const uid = (user && user.id ? user.id : 'guest').slice(0, 6);
+  return `VV-${plan}-${uid}-${Date.now()}-${Math.random().toString(36).substr(2, 5).toUpperCase()}`;
+}
+
 async function payPlan(plan) {
   if (!user || user.isDemo) {
     closeModal('pricingModal');
@@ -621,28 +784,47 @@ async function payPlan(plan) {
     toggleAuth();
     return;
   }
-  const email = user.email || '';
-  const r = await api('/api/pay/initialize', { method: 'POST', body: JSON.stringify({ plan, email }) });
-  if (r.status !== 200) {
-    const msg = (r.data && r.data.error) || 'Payment not available';
-    if (msg.includes('not configured')) toast('💳 Payments are being set up. Check back soon!');
-    else showError(msg);
+  const cfg = await loadPayConfig();
+  if (!cfg || !cfg.publicKey) {
+    toast('💳 Payments are being set up. Check back soon!');
     return;
   }
-  window.open(r.data.authorization_url, '_blank');
-  toast('Complete payment in the new tab...');
-  // poll verify
-  const ref = r.data.reference;
-  for (let i = 0; i < 20; i++) {
-    await new Promise(res => setTimeout(res, 5000));
-    const v = await api('/api/pay/verify', { method: 'POST', body: JSON.stringify({ reference: ref }) });
-    if (v.status === 200 && v.data.ok) {
-      toast('✅ Payment received! Credits added.');
-      await refreshMe();
-      return;
-    }
+  if (typeof PaystackPop === 'undefined') {
+    toast('💳 Payment gateway loading...');
+    return;
   }
-  toast('Still waiting for payment...');
+  const email = user.email || '';
+  const ref = genRef(plan);
+  const amount = plan === 'pro' ? cfg.proPrice : cfg.packPrice;
+
+  // Remember intent so the server can credit us after verification
+  await api('/api/pay/intent', { method: 'POST', body: JSON.stringify({ reference: ref, plan }) });
+
+  const handler = PaystackPop.setup({
+    key: cfg.publicKey,
+    email,
+    amount: amount * 100,
+    currency: 'NGN',
+    ref,
+    metadata: { vackvoice: true, plan },
+    callback: async (response) => {
+      toast('✅ Payment received! Verifying...');
+      const v = await api('/api/pay/verify', { method: 'POST', body: JSON.stringify({ reference: response.reference || ref }) });
+      if (v.status === 200 && v.data.ok) {
+        toast('🎉 ' + (plan === 'pro' ? 'Pro activated! 100,000 credits added.' : '5,000 credits added!'));
+        await refreshMe();
+      } else {
+        const msg = (v.data && v.data.error) || 'verification pending';
+        if (msg.includes('not configured')) {
+          toast('⚠️ Payment recorded! Credits will be added when payments go live.');
+        } else {
+          toast('⚠️ Payment received but verification pending. Contact support.');
+        }
+      }
+    },
+    onClose: () => { toast('Payment window closed.'); },
+  });
+  handler.openIframe();
 }
 
 // ---------- MODALS / TOAST ----------
