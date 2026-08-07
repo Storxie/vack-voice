@@ -44,7 +44,12 @@
       document.getElementById('title').textContent = s.textPreview || 'Shared audio';
       document.getElementById('meta').textContent = 'Voice: ' + s.voice + ' · ' + s.words.toLocaleString() + ' words';
       document.getElementById('player').src = '/audio/' + s.audioId + '.mp3';
-      document.getElementById('dlBtn').href = '/api/download/' + s.audioId + '.mp3';
+      document.getElementById('dlBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        fetch('/api/download/' + s.audioId + '.mp3', { method: 'HEAD' })
+          .then(r => { if (r.status === 401) { window.location.href = '/'; } else { window.location.href = '/api/download/' + s.audioId + '.mp3'; } })
+          .catch(() => { window.location.href = '/'; });
+      });
     })
     .catch(() => { document.getElementById('title').textContent = 'Not found'; });
 </script>
