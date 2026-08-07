@@ -461,9 +461,9 @@ async function api(path, opts = {}) {
 
 async function init() {
   const saved = localStorage.getItem('vv-theme');
-  const dark = saved === null ? true : saved === 'dark';
+  const dark = saved === null ? false : saved === 'dark';
   document.body.classList.toggle('light', !dark);
-  document.getElementById('themeToggle').checked = !dark;
+  document.getElementById('themeToggle').checked = dark;
 
   // referral from URL ?ref=CODE
   const params = new URLSearchParams(location.search);
