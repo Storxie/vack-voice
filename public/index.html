@@ -807,20 +807,22 @@ async function payPlan(plan) {
     currency: 'NGN',
     ref,
     metadata: { vackvoice: true, plan },
-    callback: async (response) => {
+    callback: function (response) {
       toast('✅ Payment received! Verifying...');
-      const v = await api('/api/pay/verify', { method: 'POST', body: JSON.stringify({ reference: response.reference || ref }) });
-      if (v.status === 200 && v.data.ok) {
-        toast('🎉 ' + (plan === 'pro' ? 'Pro activated! 100,000 credits added.' : '5,000 credits added!'));
-        await refreshMe();
-      } else {
-        const msg = (v.data && v.data.error) || 'verification pending';
-        if (msg.includes('not configured')) {
-          toast('⚠️ Payment recorded! Credits will be added when payments go live.');
+      (async () => {
+        const v = await api('/api/pay/verify', { method: 'POST', body: JSON.stringify({ reference: response.reference || ref }) });
+        if (v.status === 200 && v.data.ok) {
+          toast('🎉 ' + (plan === 'pro' ? 'Pro activated! 100,000 credits added.' : '5,000 credits added!'));
+          await refreshMe();
         } else {
-          toast('⚠️ Payment received but verification pending. Contact support.');
+          const msg = (v.data && v.data.error) || 'verification pending';
+          if (msg.includes('not configured')) {
+            toast('⚠️ Payment recorded! Credits will be added when payments go live.');
+          } else {
+            toast('⚠️ Payment received but verification pending. Contact support.');
+          }
         }
-      }
+      })();
     },
     onClose: () => { toast('Payment window closed.'); },
   });
