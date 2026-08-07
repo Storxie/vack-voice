@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vack Voice - Shared audio</title>
+<style>
+  :root { --bg:#050508; --card:#0C0C12; --border:#1e1e2a; --blue:#0066FF; --green:#22C55E; --text:#f4f4f6; --muted:#9ca3af; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:16px; padding:32px; max-width:520px; width:100%; text-align:center; }
+  .logo { display:flex; align-items:center; justify-content:center; gap:10px; font-size:20px; font-weight:800; margin-bottom:8px; }
+  .logo .mic { width:34px; height:34px; background:linear-gradient(135deg,#0066FF,#0044CC); border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .logo span { color:var(--blue); }
+  .badge { display:inline-block; background:rgba(34,197,94,0.15); border:1px solid rgba(34,197,94,0.4); color:var(--green); padding:4px 12px; border-radius:999px; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:18px; }
+  h1 { font-size:22px; margin-bottom:6px; }
+  .meta { color:var(--muted); font-size:13px; margin-bottom:22px; }
+  audio { width:100%; margin-bottom:18px; }
+  .btn { display:inline-block; padding:12px 22px; background:var(--blue); color:#fff; border-radius:10px; font-weight:700; text-decoration:none; font-size:14px; }
+  .btn:hover { background:#0052cc; }
+  footer { color:var(--muted); font-size:13px; margin-top:24px; }
+  footer b { color:var(--text); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo"><div class="mic">🎙️</div> Vack<span>Voice</span></div>
+    <div class="badge">🆓 FREE MODE</div>
+    <h1 id="title">Shared audio</h1>
+    <div class="meta" id="meta"></div>
+    <audio id="player" controls></audio>
+    <div>
+      <a class="btn" id="dlBtn" href="#" download>⬇ Download MP3</a>
+      <a class="btn" style="background:var(--green);margin-left:8px" href="/">🎙️ Create your own</a>
+    </div>
+  </div>
+  <footer><b>Vack Voice</b> · by Storxie Nexus</footer>
+<script>
+  const id = location.pathname.split('/').pop();
+  fetch('/api/share/' + id)
+    .then(r => r.json())
+    .then(s => {
+      if (!s || !s.id) { document.getElementById('title').textContent = 'Not found'; return; }
+      document.getElementById('title').textContent = s.textPreview || 'Shared audio';
+      document.getElementById('meta').textContent = 'Voice: ' + s.voice + ' · ' + s.words.toLocaleString() + ' words';
+      document.getElementById('player').src = '/audio/' + s.audioId + '.mp3';
+      document.getElementById('dlBtn').href = '/api/download/' + s.audioId + '.mp3';
+    })
+    .catch(() => { document.getElementById('title').textContent = 'Not found'; });
+</script>
+</body>
+</html>

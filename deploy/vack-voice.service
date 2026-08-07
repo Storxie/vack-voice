@@ -1,0 +1,16 @@
+[Unit]
+Description=Vack Voice - AI Voice SaaS (Storxie Nexus)
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/vack-voice
+Environment=PORT=3001
+EnvironmentFile=/home/ubuntu/vack-voice/.env
+ExecStart=/usr/bin/node server/index.js
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

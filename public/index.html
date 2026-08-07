@@ -6,200 +6,128 @@
 <title>Vack Voice - Turn text into speech in seconds</title>
 <style>
   :root {
-    --bg: #050508;
-    --card: #0C0C12;
-    --border: #1e1e2a;
-    --blue: #0066FF;
-    --green: #22C55E;
-    --red: #EF4444;
-    --text: #f4f4f6;
-    --muted: #9ca3af;
-    --inputbg: #101018;
-    --track: #1e1e2a;
-    --hover: #333;
-    --shadow: rgba(0,0,0,0.5);
-    --topbar: rgba(5,5,8,0.9);
+    --bg: #050508; --card: #0C0C12; --border: #1e1e2a; --blue: #0066FF;
+    --green: #22C55E; --red: #EF4444; --text: #f4f4f6; --muted: #9ca3af;
+    --inputbg: #101018; --track: #1e1e2a; --hover: #333;
+    --shadow: rgba(0,0,0,0.5); --topbar: rgba(5,5,8,0.9);
   }
   body.light {
-    --bg: #f5f7fb;
-    --card: #ffffff;
-    --border: #e2e8f0;
-    --text: #0f172a;
-    --muted: #64748b;
-    --inputbg: #f8fafc;
-    --track: #e2e8f0;
-    --hover: #bcd2ff;
-    --shadow: rgba(15,23,42,0.15);
-    --topbar: rgba(255,255,255,0.92);
+    --bg: #f5f7fb; --card: #ffffff; --border: #e2e8f0; --text: #0f172a;
+    --muted: #64748b; --inputbg: #f8fafc; --track: #e2e8f0; --hover: #bcd2ff;
+    --shadow: rgba(15,23,42,0.15); --topbar: rgba(255,255,255,0.92);
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    min-height: 100vh;
-    transition: background 0.25s, color 0.25s;
-  }
-  .topbar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 24px;
-    border-bottom: 1px solid var(--border);
-    background: var(--topbar);
-    position: sticky; top: 0; z-index: 10;
-    backdrop-filter: blur(8px);
-  }
-  .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
-  .logo .mic {
-    width: 34px; height: 34px; background: linear-gradient(135deg,#0066FF,#0044CC);
-    border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px;
-  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; min-height: 100vh; transition: background .25s, color .25s; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 24px; border-bottom: 1px solid var(--border); background: var(--topbar); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(8px); }
+  .logo { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 800; letter-spacing: -0.5px; cursor: pointer; }
+  .logo .mic { width: 34px; height: 34px; background: linear-gradient(135deg,#0066FF,#0044CC); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 17px; }
   .logo span { color: var(--blue); }
-  .nav { display: flex; gap: 24px; align-items: center; }
+  .nav { display: flex; gap: 22px; align-items: center; }
   .nav a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .nav a:hover { color: var(--text); }
+  .nav a:hover, .nav a.active { color: var(--text); }
   .nav a.active { color: var(--blue); }
+  .userchip { display: flex; align-items: center; gap: 8px; background: var(--inputbg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 30px; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .userchip .avatar { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg,#22C55E,#16a34a); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; }
   .hamburger { display: none; background: none; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 6px 10px; font-size: 18px; cursor: pointer; }
-  .mobile-menu {
-    display: none; flex-direction: column; gap: 4px; padding: 12px 24px;
-    background: var(--card); border-bottom: 1px solid var(--border);
-  }
+  .mobile-menu { display: none; flex-direction: column; gap: 4px; padding: 12px 24px; background: var(--card); border-bottom: 1px solid var(--border); }
   .mobile-menu.show { display: flex; }
   .mobile-menu a { color: var(--muted); text-decoration: none; padding: 10px 0; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); cursor: pointer; }
-  .mobile-menu a:last-child { border-bottom: none; }
-  .container { max-width: 860px; margin: 0 auto; padding: 40px 24px 60px; }
-  .hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
-  .hero h1 { font-size: 36px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
+  .container { max-width: 880px; margin: 0 auto; padding: 32px 24px 60px; }
+  .hero { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 22px; }
+  .hero h1 { font-size: 34px; font-weight: 800; line-height: 1.15; letter-spacing: -1px; }
   .hero h1 span { color: var(--blue); }
-  .hero p { color: var(--muted); margin-top: 10px; font-size: 16px; }
+  .hero p { color: var(--muted); margin-top: 10px; font-size: 15px; }
   .freemode { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .free-badge {
-    background: rgba(34,197,94,0.15);
-    border: 1px solid rgba(34,197,94,0.4);
-    color: var(--green);
-    padding: 5px 14px; border-radius: 999px;
-    font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;
-  }
-  .credit-meter {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 18px; min-width: 230px;
-  }
+  .free-badge { background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.4); color: var(--green); padding: 5px 14px; border-radius: 999px; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .5px; }
+  .credit-meter { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 18px; min-width: 230px; }
   .credit-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
   .credit-num { font-weight: 800; font-size: 19px; color: var(--green); }
   .credit-num span { color: var(--muted); font-weight: 400; font-size: 13px; }
   .meter-bar { height: 6px; background: var(--track); border-radius: 99px; overflow: hidden; margin-top: 6px; }
-  .meter-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.4s; }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-  }
-  .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .meter-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width .4s; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 18px; }
+  .card h3 { font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
   .card h3 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); }
-  textarea {
-    width: 100%; min-height: 180px;
-    background: var(--inputbg); color: var(--text);
-    border: 1px solid var(--border); border-radius: 12px;
-    padding: 16px; font-size: 15px; line-height: 1.6;
-    resize: vertical; font-family: inherit;
-  }
+  .dropzone { border: 2px dashed var(--border); border-radius: 12px; padding: 22px; text-align: center; color: var(--muted); font-size: 13px; cursor: pointer; transition: .2s; margin-bottom: 12px; }
+  .dropzone:hover, .dropzone.over { border-color: var(--blue); background: rgba(0,102,255,0.06); }
+  .dropzone b { color: var(--blue); }
+  textarea { width: 100%; min-height: 160px; background: var(--inputbg); color: var(--text); border: 1px solid var(--border); border-radius: 12px; padding: 16px; font-size: 15px; line-height: 1.6; resize: vertical; font-family: inherit; }
   textarea:focus { outline: 2px solid var(--blue); border-color: transparent; }
-  .voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 16px 0; }
-  .voice-card {
-    border: 1px solid var(--border); border-radius: 12px;
-    padding: 12px 14px; cursor: pointer; transition: all 0.15s;
-    background: var(--inputbg);
-  }
+  .voice-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 14px 0; }
+  .voice-card { border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; cursor: pointer; transition: all .15s; background: var(--inputbg); }
   .voice-card:hover { border-color: var(--hover); }
   .voice-card.active { border-color: var(--blue); background: rgba(0,102,255,0.08); }
   .voice-card .vname { font-weight: 700; font-size: 14px; }
   .voice-card .vdesc { color: var(--muted); font-size: 12px; margin-top: 2px; }
   .voice-card .vflag { font-size: 18px; }
-  .controls { display: flex; gap: 12px; margin-top: 16px; align-items: center; flex-wrap: wrap; }
-  .btn {
-    padding: 12px 24px; border: none; border-radius: 10px;
-    font-size: 15px; font-weight: 700; cursor: pointer;
-    transition: all 0.15s;
-  }
+  .controls { display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap; }
+  .btn { padding: 11px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .15s; }
   .btn-primary { background: var(--blue); color: #fff; }
   .btn-primary:hover { background: #0052cc; }
-  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
   .btn-ghost:hover { color: var(--text); border-color: var(--hover); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { opacity: .9; }
   .word-count { margin-left: auto; color: var(--muted); font-size: 13px; }
-  .result { margin-top: 20px; display: none; }
+  .result { margin-top: 16px; display: none; }
   .result.show { display: block; }
   .result audio { width: 100%; margin-top: 10px; }
-  .result-info { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .result-info { display: flex; justify-content: space-between; gap: 10px; color: var(--muted); font-size: 13px; margin-top: 8px; flex-wrap: wrap; }
   .error { color: var(--red); font-size: 14px; margin-top: 12px; display: none; }
   .loading { display: none; text-align: center; padding: 20px; }
   .loading.show { display: block; }
-  .spinner {
-    width: 28px; height: 28px; border: 3px solid var(--track);
-    border-top-color: var(--blue); border-radius: 50%;
-    animation: spin 0.8s linear infinite; margin: 0 auto 10px;
-  }
+  .spinner { width: 28px; height: 28px; border: 3px solid var(--track); border-top-color: var(--blue); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 10px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-    background: var(--card); border: 1px solid var(--border);
-    padding: 12px 20px; border-radius: 10px; font-size: 14px;
-    display: none; z-index: 100; box-shadow: 0 8px 30px var(--shadow);
-  }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--card); border: 1px solid var(--border); padding: 12px 20px; border-radius: 10px; font-size: 14px; display: none; z-index: 100; box-shadow: 0 8px 30px var(--shadow); max-width: 90vw; }
   .toast.show { display: block; }
-  /* Modals */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px;
-  }
+  .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.show { display: flex; }
-  .modal {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    max-width: 560px; width: 100%; padding: 28px; max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 20px 60px var(--shadow);
-  }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; max-width: 560px; width: 100%; padding: 28px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px var(--shadow); }
   .modal h2 { font-size: 24px; margin-bottom: 4px; }
   .modal .msub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
-  .plan {
-    border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px;
-    background: var(--inputbg);
-  }
+  .plan { border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px; background: var(--inputbg); }
   .plan.hot { border-color: var(--blue); background: rgba(0,102,255,0.06); }
   .plan .pname { font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; }
   .plan .pprice { color: var(--blue); font-weight: 800; margin-top: 4px; }
   .plan .pfeat { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.5; }
   .plan .pfeat b { color: var(--text); }
-  .modal-close {
-    float: right; background: transparent; border: 1px solid var(--border); color: var(--muted);
-    border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
-  }
+  .modal-close { float: right; background: transparent; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
   .modal-close:hover { color: var(--text); border-color: var(--hover); }
-  /* Settings */
-  .setting-row {
-    display: flex; align-items: center; justify-content: space-between;
-    border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--inputbg);
-  }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--border); border-radius: 12px; padding: 16px; background: var(--inputbg); }
   .setting-row .sname { font-weight: 700; font-size: 15px; }
   .setting-row .sdesc { color: var(--muted); font-size: 13px; margin-top: 2px; }
   .switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
   .switch input { opacity: 0; width: 0; height: 0; }
-  .slider {
-    position: absolute; cursor: pointer; inset: 0;
-    background: var(--track); border-radius: 99px; transition: 0.2s;
-  }
-  .slider:before {
-    content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px;
-    background: #fff; border-radius: 50%; transition: 0.2s;
-  }
+  .slider { position: absolute; cursor: pointer; inset: 0; background: var(--track); border-radius: 99px; transition: .2s; }
+  .slider:before { content: ""; position: absolute; height: 20px; width: 20px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .2s; }
   .switch input:checked + .slider { background: var(--blue); }
   .switch input:checked + .slider:before { transform: translateX(22px); }
+  input[type=text], input[type=email], input[type=password] { width: 100%; background: var(--inputbg); color: var(--text); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-bottom: 12px; font-family: inherit; }
+  input:focus { outline: 2px solid var(--blue); border-color: transparent; }
+  .auth-tabs { display: flex; gap: 8px; margin-bottom: 18px; }
+  .auth-tab { flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 10px; background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; cursor: pointer; }
+  .auth-tab.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+  .hist-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: var(--inputbg); flex-wrap: wrap; }
+  .hist-item .htext { flex: 1; min-width: 180px; font-size: 13px; color: var(--muted); }
+  .hist-item .htext b { color: var(--text); font-weight: 600; }
+  .hist-item .hmeta { font-size: 12px; color: var(--muted); }
+  .hist-item button { background: none; border: 1px solid var(--border); color: var(--muted); border-radius: 8px; padding: 6px 10px; font-size: 12px; cursor: pointer; }
+  .hist-item button:hover { color: var(--text); border-color: var(--hover); }
+  .ref-box { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .ref-box .reflink { flex: 1; min-width: 200px; background: var(--inputbg); border: 1px solid var(--border); border-radius: 10px; padding: 11px 14px; font-size: 13px; color: var(--text); font-family: monospace; word-break: break-all; }
+  .stat-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 12px 0; }
+  .stat { flex: 1; min-width: 120px; background: var(--inputbg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; text-align: center; }
+  .stat .big { font-size: 22px; font-weight: 800; color: var(--green); }
+  .stat .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
   footer { text-align: center; color: var(--muted); font-size: 14px; padding: 30px; border-top: 1px solid var(--border); }
   footer b { color: var(--text); }
+  .hidden { display: none !important; }
   @media (max-width: 600px) {
-    .hero h1 { font-size: 28px; }
+    .hero h1 { font-size: 27px; }
     .nav { display: none; }
     .hamburger { display: block; }
-    .container { padding: 24px 16px 40px; }
+    .container { padding: 20px 16px 40px; }
     .hero { flex-direction: column; align-items: flex-start; }
     .credit-meter { min-width: 100%; }
   }
@@ -208,73 +136,135 @@
 <body>
 
 <div class="topbar">
-  <div class="logo"><div class="mic">🎙️</div> Vack<span>Voice</span></div>
+  <div class="logo" onclick="goView('convert')"><div class="mic">🎙️</div> Vack<span>Voice</span></div>
   <div class="nav">
-    <a onclick="goSection('converter')" class="active">Convert</a>
-    <a onclick="goSection('voices')">Voices</a>
+    <a id="navConvert" onclick="goView('convert')" class="active">Convert</a>
+    <a id="navHistory" onclick="goView('history')">History</a>
     <a onclick="showPricing(event)">Pricing</a>
     <a onclick="showSettings(event)">Settings</a>
+    <span class="userchip" id="userChip" onclick="toggleAuth()"></span>
   </div>
   <button class="hamburger" onclick="toggleMenu()">☰</button>
 </div>
 
 <div class="mobile-menu" id="mobileMenu">
-  <a onclick="goSection('converter');toggleMenu()">Convert</a>
-  <a onclick="goSection('voices');toggleMenu()">Voices</a>
+  <a onclick="goView('convert');toggleMenu()">Convert</a>
+  <a onclick="goView('history');toggleMenu()">History</a>
   <a onclick="showPricing(event);toggleMenu()">Pricing</a>
   <a onclick="showSettings(event);toggleMenu()">Settings</a>
+  <a id="mobileAuth" onclick="toggleAuth();toggleMenu()">Sign In</a>
 </div>
 
 <div class="container">
-  <div class="hero">
-    <div>
-      <h1>Turn text into <span>voice</span> in seconds</h1>
-      <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
+
+  <!-- CONVERT VIEW -->
+  <div id="viewConvert">
+    <div class="hero">
+      <div>
+        <h1>Turn text into <span>voice</span> in seconds</h1>
+        <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
+      </div>
+      <div class="freemode">
+        <div class="free-badge">🆓 FREE MODE</div>
+        <div class="credit-meter">
+          <div class="credit-label" id="creditLabel">free credits this month</div>
+          <div class="credit-num"><span id="creditsNum">--</span><span id="creditsTotal"> / 3,000</span></div>
+          <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:100%"></div></div>
+        </div>
+      </div>
     </div>
-    <div class="freemode">
-      <div class="free-badge">🆓 FREE MODE</div>
-      <div class="credit-meter">
-        <div class="credit-label">free credits this month</div>
-        <div class="credit-num"><span id="creditsNum">--</span><span> / 3,000</span></div>
-        <div class="meter-bar"><div class="meter-fill" id="meterFill" style="width:100%"></div></div>
+
+    <div class="card" id="converter">
+      <h3><span class="dot"></span> 1. Add your text or file</h3>
+      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:24px;margin-bottom:6px">📄</div>
+        <div>Drag &amp; drop a file here, or <b>browse</b></div>
+        <div style="margin-top:4px;font-size:11px;opacity:.7">PDF · DOCX · TXT · up to 10MB</div>
+      </div>
+      <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.md" style="display:none">
+      <textarea id="textInput" placeholder="Type or paste your text here... e.g. Welcome to Vack Voice. Your content just got a voice."></textarea>
+      <div id="voices">
+        <h3 style="margin-top:16px"><span class="dot"></span> 2. Choose your voice</h3>
+        <div class="voice-grid" id="voiceGrid"></div>
+      </div>
+      <div class="controls">
+        <button class="btn btn-primary" id="genBtn" onclick="generate()">🎙️ Convert to Audio</button>
+        <button class="btn btn-ghost" onclick="clearText()">Clear</button>
+        <div class="word-count"><span id="wordCount">0</span> words · 1 credit per word</div>
+      </div>
+      <div class="error" id="errorBox"></div>
+      <div class="loading" id="loadingBox"><div class="spinner"></div><div>Generating your audio...</div></div>
+      <div class="result" id="resultBox">
+        <audio id="player" controls></audio>
+        <div class="result-info">
+          <span id="resultVoice"></span>
+          <span id="resultCredits"></span>
+        </div>
+        <div class="controls" style="margin-top:10px">
+          <button class="btn btn-green" id="dlBtn" onclick="downloadAudio()">⬇ Download MP3</button>
+          <button class="btn btn-ghost" id="shareBtn" onclick="shareAudio()">🔗 Share</button>
+          <span id="shareLinkBox" style="display:none;flex:1;min-width:200px;background:var(--inputbg);border:1px solid var(--border);border-radius:10px;padding:10px 14px;font-size:12px;font-family:monospace;color:var(--text);word-break:break-all"></span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="card" id="converter">
-    <h3><span class="dot"></span> 1. Add your text</h3>
-    <textarea id="textInput" placeholder="Type or paste your text here... e.g. Welcome to Vack Voice. Your content just got a voice."></textarea>
-    <div id="voices">
-      <h3 style="margin-top:20px"><span class="dot"></span> 2. Choose your voice</h3>
-      <div class="voice-grid" id="voiceGrid"></div>
+  <!-- HISTORY VIEW -->
+  <div id="viewHistory" class="hidden">
+    <div class="hero"><div>
+      <h1>Your <span>history</span></h1>
+      <p>Your last 50 conversions. Click a voice to replay, download or share.</p>
+    </div></div>
+    <div id="historyList"><div class="card" style="text-align:center;color:var(--muted)">Loading...</div></div>
+  </div>
+
+  <!-- REFERRALS (in history view) -->
+  <div id="referralCard" class="card hidden">
+    <h3><span class="dot" style="background:var(--green)"></span> 🎁 Earn free credits — invite friends</h3>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:10px">Share your link. When friends sign up, <b style="color:var(--text)">you earn +500 credits</b>. If they go Pro, <b style="color:var(--text)">+1,000 more</b>. Up to 10,000/month.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="big" id="refEarned">0</div><div class="lbl">credits earned</div></div>
+      <div class="stat"><div class="big" id="refCount">0</div><div class="lbl">friends joined</div></div>
     </div>
-    <div class="controls">
-      <button class="btn btn-primary" id="genBtn" onclick="generate()">🎙️ Convert to Audio</button>
-      <button class="btn btn-ghost" onclick="clearText()">Clear</button>
-      <div class="word-count"><span id="wordCount">0</span> words · 1 credit per word</div>
-    </div>
-    <div class="error" id="errorBox"></div>
-    <div class="loading" id="loadingBox">
-      <div class="spinner"></div>
-      <div>Generating your audio...</div>
-    </div>
-    <div class="result" id="resultBox">
-      <audio id="player" controls></audio>
-      <div class="result-info">
-        <span id="resultVoice"></span>
-        <span id="resultCredits"></span>
-      </div>
+    <div class="ref-box">
+      <div class="reflink" id="refLink">vackvoice.com/r/---</div>
+      <button class="btn btn-green" onclick="copyRef()">📋 Copy Link</button>
     </div>
   </div>
+
 </div>
 
-<footer>
-  <b>Vack Voice</b> · by Storxie Nexus
-</footer>
+<footer><b>Vack Voice</b> · by Storxie Nexus</footer>
 
 <div class="toast" id="toast"></div>
 
-<!-- Pricing modal: only reachable from the menu -->
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="if(event.target===this)closeModal('authModal')">
+  <div class="modal" style="max-width:420px">
+    <button class="modal-close" onclick="closeModal('authModal')">✕ Close</button>
+    <h2 id="authTitle">Welcome 👋</h2>
+    <div class="msub">Save your credits, history and referral link across devices.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchAuth('login')">Sign In</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchAuth('register')">Create Account</button>
+    </div>
+    <div id="authFormLogin">
+      <input type="email" id="loginEmail" placeholder="Email address">
+      <input type="password" id="loginPassword" placeholder="Password">
+      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="doLogin()">Sign In</button>
+    </div>
+    <div id="authFormRegister" class="hidden">
+      <input type="text" id="regName" placeholder="Your name">
+      <input type="email" id="regEmail" placeholder="Email address">
+      <input type="password" id="regPassword" placeholder="Password (min 6 characters)">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px" id="refHint"></p>
+      <button class="btn btn-primary" style="width:100%" onclick="doRegister()">Create Free Account</button>
+    </div>
+    <div class="error" id="authError" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- PRICING MODAL -->
 <div class="modal-overlay" id="pricingModal" onclick="if(event.target===this)closeModal('pricingModal')">
   <div class="modal">
     <button class="modal-close" onclick="closeModal('pricingModal')">✕ Close</button>
@@ -291,12 +281,14 @@
       <div class="pname">Pro ⭐</div>
       <div class="pprice">₦5,000 / month</div>
       <div class="pfeat"><b>100,000 credits per month</b> · <b>unlimited uploads</b> · all voices · priority generation</div>
+      <button class="btn btn-primary" style="width:100%;margin-top:12px" id="payProBtn" onclick="payPlan('pro')">Upgrade to Pro</button>
     </div>
 
     <div class="plan">
       <div class="pname">Extra credits</div>
       <div class="pprice">₦500 = 5,000 credits</div>
       <div class="pfeat">Never expire · top up anytime on any plan</div>
+      <button class="btn btn-ghost" style="width:100%;margin-top:12px" id="payPackBtn" onclick="payPlan('pack')">Buy 5,000 credits</button>
     </div>
 
     <div class="plan">
@@ -307,22 +299,21 @@
   </div>
 </div>
 
-<!-- Settings modal -->
+<!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')">
-  <div class="modal">
+  <div class="modal" style="max-width:480px">
     <button class="modal-close" onclick="closeModal('settingsModal')">✕ Close</button>
     <h2>Settings</h2>
     <div class="msub">Personalize your experience.</div>
-
     <div class="setting-row">
       <div>
         <div class="sname">🌙 Dark mode</div>
         <div class="sdesc">Switch between dark and light appearance</div>
       </div>
-      <label class="switch">
-        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
-        <span class="slider"></span>
-      </label>
+      <label class="switch"><input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)"><span class="slider"></span></label>
+    </div>
+    <div style="margin-top:14px">
+      <button class="btn btn-ghost" style="width:100%" id="logoutBtn" onclick="doLogout()">Sign Out</button>
     </div>
   </div>
 </div>
@@ -330,45 +321,136 @@
 <script>
 let selectedVoice = 'ryan';
 let voices = [];
+let token = localStorage.getItem('vv-token') || '';
+let user = null;
+let lastAudio = null;
+
+async function api(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(path, { ...opts, headers });
+  let data = null;
+  try { data = await res.json(); } catch (e) {}
+  return { status: res.status, data };
+}
 
 async function init() {
-  // Theme from saved preference (default dark)
   const saved = localStorage.getItem('vv-theme');
   const dark = saved === null ? true : saved === 'dark';
   document.body.classList.toggle('light', !dark);
   document.getElementById('themeToggle').checked = !dark;
 
-  try {
-    const res = await fetch('/api/voices');
-    const data = await res.json();
-    voices = data.voices;
-    renderVoices();
-  } catch (e) { console.error(e); }
+  // referral from URL ?ref=CODE
+  const params = new URLSearchParams(location.search);
+  const ref = params.get('ref');
+  if (ref) localStorage.setItem('vv-ref', ref);
 
   try {
-    const res = await fetch('/api/me');
-    const me = await res.json();
-    document.getElementById('creditsNum').textContent = me.credits.toLocaleString();
-    const pct = Math.max(0, Math.min(100, (me.credits / me.freeLimit) * 100));
-    document.getElementById('meterFill').style.width = pct + '%';
+    const r = await fetch('/api/voices');
+    const d = await r.json();
+    voices = d.voices; renderVoices();
   } catch (e) { console.error(e); }
 
+  await refreshMe();
   document.getElementById('textInput').addEventListener('input', updateCount);
+  document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+  setupDropzone();
   updateCount();
+}
+
+async function refreshMe() {
+  const r = await api('/api/me');
+  if (r.status === 200 && r.data) {
+    user = r.data;
+    document.getElementById('creditsNum').textContent = (user.credits || 0).toLocaleString();
+    document.getElementById('creditsTotal').textContent = user.plan === 'pro' ? '' : ' / 3,000';
+    document.getElementById('creditLabel').textContent = user.plan === 'pro' ? 'pro credits (monthly)' : 'free credits this month';
+    const limit = user.plan === 'pro' ? 100000 : 3000;
+    const pct = Math.max(0, Math.min(100, ((user.credits || 0) / limit) * 100));
+    document.getElementById('meterFill').style.width = pct + '%';
+    renderChip();
+    loadRef();
+  }
+}
+
+function renderChip() {
+  const chip = document.getElementById('userChip');
+  const mobile = document.getElementById('mobileAuth');
+  if (user && !user.isDemo) {
+    const initial = (user.name || 'U').charAt(0).toUpperCase();
+    chip.innerHTML = `<div class="avatar">${initial}</div> ${user.name.split(' ')[0]} <span style="color:var(--green)">●</span>`;
+    mobile.textContent = user.name.split(' ')[0] + ' (Sign Out)';
+  } else {
+    chip.innerHTML = `<div class="avatar">👤</div> Sign In`;
+    mobile.textContent = 'Sign In';
+  }
+}
+
+function toggleAuth() {
+  if (user && !user.isDemo) { doLogout(); return; }
+  const ref = localStorage.getItem('vv-ref');
+  if (ref) {
+    document.getElementById('refHint').textContent = '🎁 You were invited! You both get +500 credits.';
+  }
+  switchAuth('login');
+  openModal('authModal');
+}
+
+function switchAuth(mode) {
+  document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+  document.getElementById('authFormLogin').classList.toggle('hidden', mode !== 'login');
+  document.getElementById('authFormRegister').classList.toggle('hidden', mode !== 'register');
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const r = await api('/api/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+  if (r.status !== 200 || !r.data.token) { showAuthError(r.data.error || 'Login failed'); return; }
+  token = r.data.token; localStorage.setItem('vv-token', token);
+  closeModal('authModal'); clearAuthError();
+  await refreshMe(); toast('✅ Welcome back, ' + r.data.user.name.split(' ')[0] + '!');
+}
+
+async function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const email = document.getElementById('regEmail').value.trim();
+  const password = document.getElementById('regPassword').value;
+  const ref = localStorage.getItem('vv-ref') || undefined;
+  const r = await api('/api/register', { method: 'POST', body: JSON.stringify({ name, email, password, ref }) });
+  if (r.status !== 200 || !r.data.token) { showAuthError(r.data.error || 'Registration failed'); return; }
+  token = r.data.token; localStorage.setItem('vv-token', token);
+  closeModal('authModal'); clearAuthError();
+  await refreshMe(); toast('🎉 Account created! You got 3,000 free credits.');
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg; el.style.display = 'block';
+}
+function clearAuthError() { document.getElementById('authError').style.display = 'none'; }
+
+async function doLogout() {
+  await api('/api/logout', { method: 'POST' });
+  token = ''; localStorage.removeItem('vv-token');
+  user = null; renderChip(); await refreshMe(); toast('Signed out.');
+}
+
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('show'); }
+
+function goView(view) {
+  document.getElementById('viewConvert').classList.toggle('hidden', view !== 'convert');
+  document.getElementById('viewHistory').classList.toggle('hidden', view !== 'history');
+  document.getElementById('navConvert').classList.toggle('active', view === 'convert');
+  document.getElementById('navHistory').classList.toggle('active', view === 'history');
+  if (view === 'history') loadHistory();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function toggleTheme(dark) {
   document.body.classList.toggle('light', !dark);
   localStorage.setItem('vv-theme', dark ? 'dark' : 'light');
-}
-
-function toggleMenu() {
-  document.getElementById('mobileMenu').classList.toggle('show');
-}
-
-function goSection(id) {
-  const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function renderVoices() {
@@ -378,11 +460,7 @@ function renderVoices() {
     const card = document.createElement('div');
     card.className = 'voice-card' + (v.id === selectedVoice ? ' active' : '');
     card.innerHTML = `<div class="vflag">${v.flag}</div><div class="vname">${v.name}</div><div class="vdesc">${v.desc}</div>`;
-    card.onclick = () => {
-      selectedVoice = v.id;
-      document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('active'));
-      card.classList.add('active');
-    };
+    card.onclick = () => { selectedVoice = v.id; document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('active')); card.classList.add('active'); };
     grid.appendChild(card);
   });
 }
@@ -393,75 +471,192 @@ function updateCount() {
   document.getElementById('wordCount').textContent = words.toLocaleString();
 }
 
-function clearText() {
-  document.getElementById('textInput').value = '';
-  updateCount();
+function clearText() { document.getElementById('textInput').value = ''; updateCount(); }
+
+// ---------- UPLOAD ----------
+function setupDropzone() {
+  const dz = document.getElementById('dropzone');
+  ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+  dz.addEventListener('drop', e => {
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) uploadFile(f);
+  });
+}
+async function handleFileSelect(e) {
+  const f = e.target.files && e.target.files[0];
+  if (f) uploadFile(f);
+  e.target.value = '';
+}
+async function uploadFile(file) {
+  const dz = document.getElementById('dropzone');
+  dz.innerHTML = `<div class="spinner"></div><div>Reading <b>${file.name}</b>...</div>`;
+  const fd = new FormData();
+  fd.append('file', file);
+  try {
+    const res = await fetch('/api/upload', { method: 'POST', body: fd });
+    const d = await res.json();
+    if (!res.ok) throw new Error(d.error || 'Upload failed');
+    document.getElementById('textInput').value = d.text;
+    updateCount();
+    toast(`📄 ${d.words.toLocaleString()} words extracted from ${d.fileName}`);
+  } catch (err) {
+    showError(err.message);
+  }
+  dz.innerHTML = `<div style="font-size:24px;margin-bottom:6px">📄</div><div>Drag &amp; drop a file here, or <b>browse</b></div><div style="margin-top:4px;font-size:11px;opacity:.7">PDF · DOCX · TXT · up to 10MB</div>`;
 }
 
+// ---------- GENERATE ----------
 async function generate() {
   const text = document.getElementById('textInput').value.trim();
   const errorBox = document.getElementById('errorBox');
   const loadingBox = document.getElementById('loadingBox');
   const resultBox = document.getElementById('resultBox');
   const genBtn = document.getElementById('genBtn');
-
   errorBox.style.display = 'none';
   resultBox.classList.remove('show');
-  if (!text) { showError('Please type some text first.'); return; }
-
-  genBtn.disabled = true;
-  loadingBox.classList.add('show');
-
+  if (!text) { showError('Please type or upload some text first.'); return; }
+  genBtn.disabled = true; loadingBox.classList.add('show');
   try {
-    const res = await fetch('/api/tts', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice: selectedVoice })
-    });
-    const data = await res.json();
-
-    if (!res.ok) {
-      if (data.upgrade) {
-        showError(`Not enough credits. You need ${data.needed.toLocaleString()} but have ${data.have.toLocaleString()}. Upgrade to Pro for 100K credits.`);
-      } else {
-        showError(data.error || 'Something went wrong.');
-      }
+    const r = await api('/api/tts', { method: 'POST', body: JSON.stringify({ text, voice: selectedVoice }) });
+    if (r.status !== 200) {
+      if (r.data && r.data.upgrade) showError(`Not enough credits. You need ${r.data.needed.toLocaleString()} but have ${r.data.have.toLocaleString()}. Upgrade to Pro for 100K credits.`);
+      else showError((r.data && r.data.error) || 'Something went wrong.');
       return;
     }
-
-    document.getElementById('player').src = data.audioUrl;
-    document.getElementById('resultVoice').textContent = 'Voice: ' + data.voice + ' · ' + data.words.toLocaleString() + ' words';
-    document.getElementById('resultCredits').textContent = data.creditsLeft.toLocaleString() + ' credits left';
-    document.getElementById('creditsNum').textContent = data.creditsLeft.toLocaleString();
-    const pct = Math.max(0, Math.min(100, (data.creditsLeft / 3000) * 100));
+    const d = r.data;
+    lastAudio = { url: d.audioUrl, id: d.id, file: d.audioUrl.split('/').pop() };
+    document.getElementById('player').src = d.audioUrl;
+    document.getElementById('resultVoice').textContent = 'Voice: ' + d.voice + ' · ' + d.words.toLocaleString() + ' words';
+    document.getElementById('resultCredits').textContent = d.creditsLeft.toLocaleString() + ' credits left';
+    document.getElementById('creditsNum').textContent = d.creditsLeft.toLocaleString();
+    const limit = (user && user.plan === 'pro') ? 100000 : 3000;
+    const pct = Math.max(0, Math.min(100, (d.creditsLeft / limit) * 100));
     document.getElementById('meterFill').style.width = pct + '%';
+    document.getElementById('shareLinkBox').style.display = 'none';
     resultBox.classList.add('show');
-  } catch (e) {
-    showError('Network error. Please try again.');
-  } finally {
-    genBtn.disabled = false;
-    loadingBox.classList.remove('show');
+  } catch (e) { showError('Network error. Please try again.'); }
+  finally { genBtn.disabled = false; loadingBox.classList.remove('show'); }
+}
+
+function downloadAudio() {
+  if (!lastAudio) return;
+  window.location.href = '/api/download/' + lastAudio.file;
+}
+
+async function shareAudio() {
+  if (!lastAudio) return;
+  const r = await api('/api/share', { method: 'POST', body: JSON.stringify({ audioId: lastAudio.id }) });
+  if (r.status !== 200) { showError((r.data && r.data.error) || 'Could not create share link'); return; }
+  const url = location.origin + r.data.url;
+  const box = document.getElementById('shareLinkBox');
+  box.textContent = url;
+  box.style.display = 'block';
+  try { await navigator.clipboard.writeText(url); toast('🔗 Share link copied!'); }
+  catch (e) { toast('🔗 Share link ready'); }
+}
+
+// ---------- HISTORY + REFERRALS ----------
+async function loadHistory() {
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted)">Loading...</div>';
+  const r = await api('/api/history');
+  if (r.status !== 200) { list.innerHTML = '<div class="card" style="text-align:center;color:var(--red)">Could not load history</div>'; return; }
+  const items = r.data.items || [];
+  if (!items.length) {
+    list.innerHTML = '<div class="card" style="text-align:center;color:var(--muted)">No conversions yet. Go to Convert and make your first audio! 🎙️</div>';
+  } else {
+    list.innerHTML = items.map(it => `
+      <div class="hist-item">
+        <div class="htext"><b>${esc(it.voice)}</b> · ${esc(it.textPreview)}…</div>
+        <div class="hmeta">${it.words.toLocaleString()} words · ${new Date(it.createdAt).toLocaleString()}</div>
+        <div style="display:flex;gap:6px">
+          <button onclick="playHist('${it.id}')">▶ Play</button>
+          <button onclick="dlHist('${it.id}')">⬇</button>
+          <button onclick="shareHist('${it.id}')">🔗</button>
+        </div>
+      </div>`).join('');
   }
 }
+function playHist(id) {
+  goView('convert');
+  const item = { url: '/audio/' + id + '.mp3', id, file: id + '.mp3' };
+  lastAudio = item;
+  document.getElementById('player').src = item.url;
+  document.getElementById('resultBox').classList.add('show');
+  document.getElementById('player').play();
+}
+function dlHist(id) { window.location.href = '/api/download/' + id + '.mp3'; }
+async function shareHist(id) {
+  const r = await api('/api/share', { method: 'POST', body: JSON.stringify({ audioId: id }) });
+  if (r.status === 200) {
+    const url = location.origin + r.data.url;
+    try { await navigator.clipboard.writeText(url); toast('🔗 Share link copied!'); }
+    catch (e) { toast('🔗 ' + url); }
+  }
+}
+function esc(s) { return String(s || '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
 
-function showError(msg) {
-  const box = document.getElementById('errorBox');
-  box.textContent = msg;
-  box.style.display = 'block';
+async function loadRef() {
+  const card = document.getElementById('referralCard');
+  if (!user || user.isDemo) { card.classList.add('hidden'); return; }
+  const r = await api('/api/referrals');
+  if (r.status !== 200) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  document.getElementById('refLink').textContent = r.data.url;
+  document.getElementById('refEarned').textContent = r.data.creditsThisMonth.toLocaleString();
+  document.getElementById('refCount').textContent = r.data.referrals.length;
+}
+async function copyRef() {
+  const link = document.getElementById('refLink').textContent;
+  try { await navigator.clipboard.writeText(link); toast('📋 Referral link copied!'); }
+  catch (e) { toast('📋 ' + link); }
 }
 
-function showPricing(e) {
-  if (e) e.preventDefault();
-  document.getElementById('pricingModal').classList.add('show');
+// ---------- PAYSTACK ----------
+async function payPlan(plan) {
+  if (!user || user.isDemo) {
+    closeModal('pricingModal');
+    toast('Please sign in first to upgrade 💳');
+    toggleAuth();
+    return;
+  }
+  const email = user.email || '';
+  const r = await api('/api/pay/initialize', { method: 'POST', body: JSON.stringify({ plan, email }) });
+  if (r.status !== 200) {
+    const msg = (r.data && r.data.error) || 'Payment not available';
+    if (msg.includes('not configured')) toast('💳 Payments are being set up. Check back soon!');
+    else showError(msg);
+    return;
+  }
+  window.open(r.data.authorization_url, '_blank');
+  toast('Complete payment in the new tab...');
+  // poll verify
+  const ref = r.data.reference;
+  for (let i = 0; i < 20; i++) {
+    await new Promise(res => setTimeout(res, 5000));
+    const v = await api('/api/pay/verify', { method: 'POST', body: JSON.stringify({ reference: ref }) });
+    if (v.status === 200 && v.data.ok) {
+      toast('✅ Payment received! Credits added.');
+      await refreshMe();
+      return;
+    }
+  }
+  toast('Still waiting for payment...');
 }
 
-function showSettings(e) {
-  if (e) e.preventDefault();
-  document.getElementById('settingsModal').classList.add('show');
-}
-
-function closeModal(id) {
-  document.getElementById(id).classList.remove('show');
+// ---------- MODALS / TOAST ----------
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function showPricing(e) { if (e) e.preventDefault(); openModal('pricingModal'); }
+function showSettings(e) { if (e) e.preventDefault(); openModal('settingsModal'); }
+function showError(msg) { const b = document.getElementById('errorBox'); b.textContent = msg; b.style.display = 'block'; }
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 4000);
 }
 
 init();
