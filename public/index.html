@@ -112,6 +112,32 @@
     display: none; z-index: 100; box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   }
   .toast.show { display: block; }
+  /* Pricing modal */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7); align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    max-width: 560px; width: 100%; padding: 28px; max-height: 90vh; overflow-y: auto;
+  }
+  .modal h2 { font-size: 24px; margin-bottom: 4px; }
+  .modal .msub { color: var(--muted); font-size: 14px; margin-bottom: 20px; }
+  .plan {
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    background: #101018;
+  }
+  .plan.hot { border-color: var(--blue); background: rgba(0,102,255,0.06); }
+  .plan .pname { font-weight: 800; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .plan .pprice { color: var(--blue); font-weight: 800; margin-top: 4px; }
+  .plan .pfeat { color: var(--muted); font-size: 13px; margin-top: 6px; line-height: 1.5; }
+  .plan .pfeat b { color: var(--text); }
+  .modal-close {
+    float: right; background: transparent; border: 1px solid var(--border); color: var(--muted);
+    border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px;
+  }
+  .modal-close:hover { color: var(--text); border-color: #333; }
   footer { text-align: center; color: #444; font-size: 13px; padding: 30px; border-top: 1px solid var(--border); }
   footer b { color: var(--muted); }
   @media (max-width: 600px) {
@@ -134,7 +160,7 @@
 <div class="container">
   <div class="hero">
     <h1>Turn text into <span>voice</span> in seconds</h1>
-    <p>5 natural voices including African accents. Free forever plan. No watermark.</p>
+    <p>7 natural African &amp; British voices. No watermark. No signup needed to try.</p>
   </div>
 
   <div class="credit-meter">
@@ -173,6 +199,39 @@
 </footer>
 
 <div class="toast" id="toast"></div>
+
+<!-- Pricing modal: only reachable from the menu -->
+<div class="modal-overlay" id="pricingModal" onclick="if(event.target===this)closePricing()">
+  <div class="modal">
+    <button class="modal-close" onclick="closePricing()">✕ Close</button>
+    <h2>Pricing</h2>
+    <div class="msub">Simple plans. No hidden fees. Upgrade anytime.</div>
+
+    <div class="plan">
+      <div class="pname">FREE MODE</div>
+      <div class="pprice">₦0 · forever</div>
+      <div class="pfeat"><b>3,000 credits every month</b> · 7 African &amp; British voices · no watermark</div>
+    </div>
+
+    <div class="plan hot">
+      <div class="pname">Pro ⭐</div>
+      <div class="pprice">₦5,000 / month</div>
+      <div class="pfeat"><b>100,000 credits per month</b> · <b>unlimited uploads</b> · all voices · priority generation</div>
+    </div>
+
+    <div class="plan">
+      <div class="pname">Extra credits</div>
+      <div class="pprice">₦500 = 5,000 credits</div>
+      <div class="pfeat">Never expire · top up anytime on any plan</div>
+    </div>
+
+    <div class="plan">
+      <div class="pname">Refer &amp; earn 🎁</div>
+      <div class="pprice">Free credits</div>
+      <div class="pfeat"><b>+500 credits</b> when a friend joins · <b>+1,000 credits</b> when a friend goes Pro · up to 10,000/month</div>
+    </div>
+  </div>
+</div>
 
 <script>
 let selectedVoice = 'ryan';
@@ -279,10 +338,11 @@ function showError(msg) {
 
 function showPricing(e) {
   e.preventDefault();
-  const toast = document.getElementById('toast');
-  toast.innerHTML = '💰 <b>Pricing</b><br>Free: 3,000 credits/mo<br>Pro: ₦5,000/mo = 100,000 credits + unlimited uploads<br>Extra credits: ₦500 = 5,000 (never expire)';
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 6000);
+  document.getElementById('pricingModal').classList.add('show');
+}
+
+function closePricing() {
+  document.getElementById('pricingModal').classList.remove('show');
 }
 
 init();

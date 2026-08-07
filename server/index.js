@@ -22,9 +22,11 @@ if (!fs.existsSync(AUDIO_DIR)) fs.mkdirSync(AUDIO_DIR, { recursive: true });
 const VOICES = {
   ryan:     { name: 'Ryan',     edge: 'en-GB-RyanNeural',      flag: '🇬🇧', desc: 'British, clear, professional' },
   ezinne:   { name: 'Ezinne',   edge: 'en-NG-EzinneNeural',    flag: '🇳🇬', desc: 'Nigerian English, warm' },
+  abeo:     { name: 'Abeo',     edge: 'en-NG-AbeoNeural',      flag: '🇳🇬', desc: 'Nigerian English, smooth' },
   chilemba: { name: 'Chilemba', edge: 'en-KE-ChilembaNeural',  flag: '🇰🇪', desc: 'Kenyan English, upbeat' },
-  guy:      { name: 'Guy',      edge: 'en-US-GuyNeural',       flag: '🇺🇸', desc: 'American, friendly' },
-  sonia:    { name: 'Sonia',    edge: 'en-US-SoniaNeural',     flag: '🇺🇸', desc: 'American, soft' },
+  asilia:   { name: 'Asilia',   edge: 'en-KE-AsiliaNeural',    flag: '🇰🇪', desc: 'Kenyan English, friendly' },
+  leah:     { name: 'Leah',     edge: 'en-ZA-LeahNeural',      flag: '🇿🇦', desc: 'South African, smooth' },
+  luke:     { name: 'Luke',     edge: 'en-ZA-LukeNeural',      flag: '🇿🇦', desc: 'South African, warm' },
 };
 
 // ---------- CREDITS (simple JSON store for v0.1) ----------
