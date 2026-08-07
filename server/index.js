@@ -34,6 +34,8 @@ const VOICES = {
   asilia:   { name: 'Asilia',   edge: 'en-KE-AsiliaNeural',    flag: '🇰🇪', desc: 'Kenyan English, friendly' },
   leah:     { name: 'Leah',     edge: 'en-ZA-LeahNeural',      flag: '🇿🇦', desc: 'South African, smooth' },
   luke:     { name: 'Luke',     edge: 'en-ZA-LukeNeural',      flag: '🇿🇦', desc: 'South African, warm' },
+  christopher: { name: 'Christopher', edge: 'en-US-ChristopherNeural', flag: '🇺🇸', desc: 'American, deep & authoritative' },
+  jenny:    { name: 'Jenny',    edge: 'en-US-JennyNeural',     flag: '🇺🇸', desc: 'American, friendly & natural' },
 };
 
 // ---------- PLANS ----------
