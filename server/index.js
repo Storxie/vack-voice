@@ -429,8 +429,12 @@ app.get('/s/:id', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'share.html'));
 });
 
-// ---------- API: DOWNLOAD ----------
+// ---------- API: DOWNLOAD (login required) ----------
 app.get('/api/download/:file', (req, res) => {
+  const db = loadDb();
+  if (!hasValidToken(db, req)) {
+    return res.status(401).json({ error: 'Create a free account to download audio', loginRequired: true });
+  }
   const file = path.basename(req.params.file);
   const fp = path.join(AUDIO_DIR, file);
   if (!fs.existsSync(fp)) return res.status(404).json({ error: 'File not found' });
